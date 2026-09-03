@@ -8,11 +8,10 @@ uvicorn
 pydantic
 httpx
 requests
-langchain_google_community
 langchain_tavily
 langchain_groq
-langchain_openai
+langchain-google-genai
 langgraph
-langchain-google-community
-
--e .
+duckduckgo-search
+ddgs
+reportlab

@@ -13,7 +13,7 @@ from tools.currency_conversion_tool import CurrencyConverterTool
 
 class GraphBuilder():
 
-    def __init__(self, model_provider:str='groq'):
+    def __init__(self, model_provider:str='google'):
         self.model_loader = ModelLoader(model_provider=model_provider)
         self.llm = self.model_loader.load_llm()
         
@@ -46,7 +46,6 @@ class GraphBuilder():
         graph_builder.add_edge(START,"agent")
         graph_builder.add_conditional_edges("agent", tools_condition)
         graph_builder.add_edge("tools","agent")
-        graph_builder.add_edge("agent",END)
         self.graph = graph_builder.compile()
         return self.graph
 

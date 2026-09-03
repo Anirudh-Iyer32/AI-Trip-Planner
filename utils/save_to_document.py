@@ -1,13 +1,19 @@
-import os 
-
+import os
 import datetime
+import re
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.units import cm
+from reportlab.lib import colors
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, HRFlowable
+from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 
 
-
-def save_document(response_text:str , directory:str="./output"):
+def save_document(response_text: str, directory: str = "./output"):
     """Export travel plan to markdown file with proper formatting"""
-    os.makedirs(directory,exist_ok=True)
-    
+    os.makedirs(directory, exist_ok=True)
+
     markdown_content = f"""# AI Travel Plan
     # **Generated:** {datetime.datetime.now().strftime('%Y-%m-%d at %H:%M')}  
     # **Created by:** Eby's Travel Agent
@@ -22,18 +28,198 @@ def save_document(response_text:str , directory:str="./output"):
     """
 
     try:
-        # Write to markdown file with UTF-8 encoding
-        # Generate timestamp-based filename
         timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         filename = f"{directory}/AI_Trip_Planner_{timestamp}.md"
 
-
-        with open(filename,"w", encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             f.write(markdown_content)
 
-            print(f"markdown file saved as: {filename}")
-            return filename
-        
+        print(f"Markdown file saved as: {filename}")
+        return filename
+
     except Exception as e:
-        print(f"Error saving markdown file: {e}") 
-        return None 
+        print(f"Error saving markdown file: {e}")
+        return None
+
+
+def save_to_pdf(response_text: str, directory: str = "./output") -> str | None:
+    """Export travel plan to a styled PDF file using reportlab."""
+    os.makedirs(directory, exist_ok=True)
+
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    pdf_filename = f"AI_Trip_Planner_{timestamp}.pdf"
+    pdf_path = os.path.join(directory, pdf_filename)
+
+    try:
+        doc = SimpleDocTemplate(
+            pdf_path,
+            pagesize=A4,
+            rightMargin=2 * cm,
+            leftMargin=2 * cm,
+            topMargin=2 * cm,
+            bottomMargin=2 * cm,
+        )
+
+        base_styles = getSampleStyleSheet()
+
+        title_style = ParagraphStyle(
+            "TripTitle",
+            parent=base_styles["Title"],
+            fontSize=22,
+            textColor=colors.HexColor("#1a3c5e"),
+            spaceAfter=4,
+            alignment=TA_CENTER,
+            fontName="Helvetica-Bold",
+        )
+        subtitle_style = ParagraphStyle(
+            "TripSubtitle",
+            parent=base_styles["Normal"],
+            fontSize=10,
+            textColor=colors.HexColor("#555555"),
+            spaceAfter=2,
+            alignment=TA_CENTER,
+            fontName="Helvetica-Oblique",
+        )
+        heading1_style = ParagraphStyle(
+            "Heading1Custom",
+            parent=base_styles["Heading1"],
+            fontSize=14,
+            textColor=colors.HexColor("#1a3c5e"),
+            spaceBefore=14,
+            spaceAfter=4,
+            fontName="Helvetica-Bold",
+        )
+        heading2_style = ParagraphStyle(
+            "Heading2Custom",
+            parent=base_styles["Heading2"],
+            fontSize=12,
+            textColor=colors.HexColor("#c4622d"),
+            spaceBefore=10,
+            spaceAfter=3,
+            fontName="Helvetica-Bold",
+        )
+        heading3_style = ParagraphStyle(
+            "Heading3Custom",
+            parent=base_styles["Heading3"],
+            fontSize=11,
+            textColor=colors.HexColor("#2e6da4"),
+            spaceBefore=8,
+            spaceAfter=2,
+            fontName="Helvetica-BoldOblique",
+        )
+        body_style = ParagraphStyle(
+            "BodyCustom",
+            parent=base_styles["Normal"],
+            fontSize=10,
+            leading=15,
+            textColor=colors.HexColor("#333333"),
+            spaceAfter=4,
+            alignment=TA_JUSTIFY,
+            fontName="Helvetica",
+        )
+        bullet_style = ParagraphStyle(
+            "BulletCustom",
+            parent=body_style,
+            leftIndent=16,
+            bulletIndent=4,
+            spaceAfter=2,
+        )
+        footer_style = ParagraphStyle(
+            "FooterCustom",
+            parent=base_styles["Normal"],
+            fontSize=8,
+            textColor=colors.HexColor("#888888"),
+            alignment=TA_CENTER,
+            fontName="Helvetica-Oblique",
+        )
+
+        def esc(text: str) -> str:
+            return (
+                text.replace("&", "&amp;")
+                    .replace("<", "&lt;")
+                    .replace(">", "&gt;")
+            )
+
+        def inline_md(txt: str) -> str:
+            txt = esc(txt)
+            txt = re.sub(r"\*\*\*(.+?)\*\*\*", r"<b><i>\1</i></b>", txt)
+            txt = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", txt)
+            txt = re.sub(r"\*(.+?)\*", r"<i>\1</i>", txt)
+            txt = re.sub(r"_(.+?)_", r"<i>\1</i>", txt)
+            txt = re.sub(r"`(.+?)`", r"<font name='Courier'>\1</font>", txt)
+            return txt
+
+        def line_to_flowable(line: str):
+            stripped = line.strip()
+            if not stripped:
+                return Spacer(1, 4)
+
+            if stripped.startswith("### "):
+                return Paragraph(inline_md(stripped[4:]), heading3_style)
+            if stripped.startswith("## "):
+                return Paragraph(inline_md(stripped[3:]), heading2_style)
+            if stripped.startswith("# "):
+                return Paragraph(inline_md(stripped[2:]), heading1_style)
+
+            if re.match(r"^[-*_]{3,}$", stripped):
+                return HRFlowable(
+                    width="100%", thickness=0.5,
+                    color=colors.HexColor("#cccccc"), spaceAfter=6, spaceBefore=6
+                )
+
+            if stripped.startswith("- ") or stripped.startswith("* "):
+                return Paragraph(
+                    f"• {inline_md(stripped[2:])}", bullet_style
+                )
+            if re.match(r"^\d+\. ", stripped):
+                num, rest = stripped.split(". ", 1)
+                return Paragraph(
+                    f"{num}. {inline_md(rest)}", bullet_style
+                )
+
+            return Paragraph(inline_md(stripped), body_style)
+
+        story = []
+
+        # Header section
+        story.append(Paragraph("✈ VOYAGE — AI Travel Plan", title_style))
+        story.append(
+            Paragraph(
+                f"Generated: {datetime.datetime.now().strftime('%B %d, %Y at %H:%M')}",
+                subtitle_style,
+            )
+        )
+        story.append(Paragraph("Bespoke Editorial Itinerary", subtitle_style))
+        story.append(Spacer(1, 6))
+        story.append(
+            HRFlowable(
+                width="100%", thickness=1.5,
+                color=colors.HexColor("#c4622d"), spaceAfter=12
+            )
+        )
+
+        for line in response_text.splitlines():
+            story.append(line_to_flowable(line))
+
+        story.append(Spacer(1, 16))
+        story.append(
+            HRFlowable(
+                width="100%", thickness=0.5,
+                color=colors.HexColor("#cccccc"), spaceAfter=6
+            )
+        )
+        story.append(
+            Paragraph(
+                "This travel plan was generated by AI. Please verify all information, "
+                "especially prices, operating hours, and travel requirements before your trip.",
+                footer_style,
+            )
+        )
+
+        doc.build(story)
+        print(f"PDF saved as: {pdf_path}")
+        return pdf_filename
+
+    except Exception as e:
+        print(f"Error saving PDF: {e}")
+        return None

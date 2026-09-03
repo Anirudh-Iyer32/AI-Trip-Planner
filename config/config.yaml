@@ -1,7 +1,7 @@
 llm:
-  openai:
-    provider: "openai"
-    model_name: "o4-mini"
+  google:
+    provider: "google"
+    model_name: "gemini-2.5-flash"
   groq:
     provider: "groq"
-    model_name: "deepseek-r1-distill-llama-70b"
+    model_name: "llama-3.3-70b-versatile"

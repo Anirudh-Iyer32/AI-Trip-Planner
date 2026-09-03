@@ -6,7 +6,7 @@ AI-Trip-Planner is an advanced, agentic travel planning application that leverag
 
 - **Agentic Workflow**: Utilizes LangGraph to build a stateful, tool-augmented agent for travel planning.
 - **Tool Integration**: Modular tools for weather, currency, expense calculation, and place search, each encapsulated and reusable.
-- **LLM Orchestration**: Integrates LLMs (OpenAI, Groq) via LangChain for dynamic, context-aware responses.
+- **LLM Orchestration**: Integrates LLMs (Google Gemini, Groq) via LangChain for dynamic, context-aware responses.
 - **API & UI**: FastAPI backend with a Streamlit frontend for interactive user experience.
 - **Automatic Markdown Export**: Each travel plan is saved as a well-formatted Markdown file.
 
@@ -54,7 +54,7 @@ The agent is equipped with the following modular tools, each implemented as a cl
 ### 2. PlaceSearchTool
 **File:** `tools/place_search_tool.py`  
 **Depends on:** `utils/place_info_search.py`  
-**Purpose:** Finds attractions, restaurants, activities, and transportation options using Google Places and Tavily APIs.
+**Purpose:** Finds attractions, restaurants, activities, and transportation options using DuckDuckGo Search (and Tavily API).
 **Exposed Functions:**
   - `search_attractions(place: str) -> str`
   - `search_restaurants(place: str) -> str`
