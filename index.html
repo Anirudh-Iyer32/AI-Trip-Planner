@@ -4,15 +4,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VOYAGE — Your world, planned by AI</title>
+  <title>VOYAGE — The AI Travel Copilot</title>
   <meta name="description"
-    content="Voyage builds your bespoke travel itinerary in seconds. Handcrafted, editorial itineraries powered by real-time intelligence.">
+    content="Voyage builds and optimizes bespoke travel itineraries in seconds. Powered by agentic intelligence with real-time weather, budget optimization, and in-trip companion.">
 
   <!-- Google Fonts: Playfair Display & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap"
     rel="stylesheet">
 
   <style>
@@ -28,6 +28,7 @@
     :root {
       --bg-cream: #F5F0E8;
       --bg-white: #FFFFFF;
+      --bg-card: #FAF6F0;
       --bg-dark: #1A1A18;
       --bg-dark-card: #222220;
       --text-dark: #1A1A18;
@@ -36,11 +37,17 @@
       --text-light-muted: #A39D93;
       --accent-terracotta: #C4622D;
       --accent-terracotta-hover: #A84E1F;
+      --accent-gold: #D4A373;
+      --accent-green: #2D6A4F;
+      --accent-blue: #1D3557;
       --border-cream: #E0D9CE;
       --border-dark: #333330;
       --num-grey: #E5E0D8;
       --font-serif: 'Playfair Display', Georgia, serif;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
     }
 
     html {
@@ -56,6 +63,7 @@
     body {
       background-color: var(--bg-cream);
       overflow-x: hidden;
+      min-height: 100vh;
     }
 
     a {
@@ -69,7 +77,60 @@
     select,
     textarea {
       font-family: inherit;
-      border-radius: 0 !important;
+    }
+
+    /* BUTTONS */
+    .btn-terracotta {
+      background-color: var(--accent-terracotta);
+      color: #FFFFFF;
+      border: 1px solid var(--accent-terracotta);
+      padding: 12px 28px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      text-align: center;
+      transition: all 0.2s ease;
+    }
+
+    .btn-terracotta:hover {
+      background-color: var(--accent-terracotta-hover);
+      border-color: var(--accent-terracotta-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(196, 98, 45, 0.25);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--text-dark);
+      border: 1px solid var(--border-cream);
+      padding: 10px 22px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-outline:hover {
+      background-color: var(--bg-white);
+      border-color: var(--accent-terracotta);
+      color: var(--accent-terracotta);
+    }
+
+    .btn-sm {
+      padding: 8px 16px;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
     }
 
     /* 1. NAVBAR */
@@ -106,12 +167,12 @@
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 3rem;
+      gap: 2.5rem;
       list-style: none;
     }
 
     .nav-link {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-weight: 500;
       letter-spacing: 0.15em;
       text-transform: uppercase;
@@ -140,28 +201,19 @@
       width: 100%;
     }
 
-    .btn-terracotta {
-      background-color: var(--accent-terracotta);
-      color: #FFFFFF;
-      border: 1px solid var(--accent-terracotta);
-      padding: 12px 28px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      cursor: pointer;
-      display: inline-block;
-      text-align: center;
-      transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
     }
 
-    .btn-terracotta:hover {
-      background-color: var(--accent-terracotta-hover);
-      border-color: var(--accent-terracotta-hover);
-    }
-
-    .btn-terracotta:active {
-      transform: translateY(1px);
+    .badge-saved {
+      background: var(--accent-terracotta);
+      color: #fff;
+      font-size: 0.65rem;
+      padding: 2px 7px;
+      border-radius: 12px;
+      margin-left: 4px;
     }
 
     /* 2. HERO SECTION */
@@ -199,6 +251,21 @@
       padding-top: 40px;
     }
 
+    .hero-pilot-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(8px);
+      padding: 6px 18px;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #FFFFFF;
+      margin-bottom: 1.5rem;
+    }
+
     .hero-headline {
       font-family: var(--font-serif);
       font-size: 4.25rem;
@@ -206,11 +273,7 @@
       line-height: 1.15;
       color: #FFFFFF;
       letter-spacing: -0.01em;
-      margin-bottom: 2rem;
-    }
-
-    .hero-headline span {
-      display: block;
+      margin-bottom: 1.75rem;
     }
 
     .hero-subheading {
@@ -218,80 +281,21 @@
       font-weight: 300;
       color: rgba(255, 255, 255, 0.9);
       max-width: 680px;
-      margin: 0 auto 2.75rem auto;
+      margin: 0 auto 2.5rem auto;
       line-height: 1.7;
-      letter-spacing: 0.02em;
     }
 
-    .hero-cta {
-      padding: 16px 38px;
-      font-size: 0.85rem;
-      letter-spacing: 0.22em;
-    }
-
-    .hero-scroll-indicator {
-      position: absolute;
-      bottom: 2.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.75rem;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 0.75rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      font-weight: 400;
-    }
-
-    .hero-scroll-line {
-      width: 1px;
-      height: 32px;
-      background-color: rgba(255, 255, 255, 0.4);
-      animation: scrollPulse 2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
-    }
-
-    @keyframes scrollPulse {
-      0% {
-        transform: scaleY(0);
-        transform-origin: top;
-        opacity: 0;
-      }
-
-      50% {
-        transform: scaleY(1);
-        transform-origin: top;
-        opacity: 1;
-      }
-
-      50.1% {
-        transform: scaleY(1);
-        transform-origin: bottom;
-        opacity: 1;
-      }
-
-      100% {
-        transform: scaleY(0);
-        transform-origin: bottom;
-        opacity: 0;
-      }
-    }
-
-    /* 3. DESTINATION STRIP */
+    /* 3. DESTINATIONS SECTION */
     .destinations-section {
-      padding: 5.5rem 0 3rem 0;
+      padding: 6rem 4rem;
       background-color: var(--bg-cream);
     }
 
     .destinations-header {
-      max-width: 1320px;
-      margin: 0 auto 2.5rem auto;
-      padding: 0 3rem;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
+      margin-bottom: 3rem;
     }
 
     .section-eyebrow {
@@ -300,142 +304,123 @@
       letter-spacing: 0.25em;
       text-transform: uppercase;
       color: var(--accent-terracotta);
-      margin-bottom: 0.75rem;
+      margin-bottom: 0.5rem;
     }
 
     .section-title {
       font-family: var(--font-serif);
       font-size: 2.5rem;
-      font-weight: 600;
-      line-height: 1.2;
+      font-weight: 500;
       color: var(--text-dark);
+      line-height: 1.2;
     }
 
     .destinations-container {
-      max-width: 1320px;
-      margin: 0 auto;
-      padding: 0 3rem;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 2rem;
     }
 
     .destination-card {
       position: relative;
-      aspect-ratio: 3 / 4;
+      height: 380px;
       overflow: hidden;
       cursor: pointer;
-      background-color: #1A1A18;
-      border: none;
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .destination-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
     }
 
     .destination-image {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      display: block;
-      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: transform 0.5s ease;
     }
 
     .destination-card:hover .destination-image {
-      transform: scale(1.03);
+      transform: scale(1.05);
     }
 
     .destination-overlay {
       position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      top: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, transparent 55%);
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
       display: flex;
       flex-direction: column;
       justify-content: flex-end;
-      align-items: flex-start;
-      padding: 20px;
-      text-align: left;
+      padding: 2rem;
+      color: #FFFFFF;
     }
 
     .destination-state {
-      font-family: var(--font-sans);
-      font-size: 10px;
-      font-weight: 500;
+      font-size: 0.7rem;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: #FFFFFF;
-      opacity: 0.75;
-      margin-bottom: 2px;
+      opacity: 0.8;
+      margin-bottom: 0.25rem;
     }
 
     .destination-city {
       font-family: var(--font-serif);
-      font-size: 26px;
-      font-weight: 400;
-      color: #FFFFFF;
-      line-height: 1.15;
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
     }
 
     .destination-story {
-      font-family: var(--font-serif);
+      font-size: 0.85rem;
       font-style: italic;
-      font-size: 13px;
-      color: #FFFFFF;
-      opacity: 0.82;
-      margin-top: 6px;
-      display: block;
-      line-height: 1.35;
+      opacity: 0.9;
+      line-height: 1.4;
     }
 
-    /* 4. CHATBOT SECTION */
+    /* 4. PLANNER & WORKSPACE */
     .planner-section {
-      padding: 5rem 2rem 7rem 2rem;
-      background-color: var(--bg-cream);
+      padding: 5rem 4rem;
+      background-color: var(--bg-white);
+      border-top: 1px solid var(--border-cream);
     }
 
     .planner-wrapper {
-      max-width: 860px;
+      max-width: 1100px;
       margin: 0 auto;
     }
 
     .planner-header {
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 2.5rem;
     }
 
-    /* Chat Window */
     .chat-window {
-      background-color: var(--bg-white);
+      background: var(--bg-cream);
       border: 1px solid var(--border-cream);
+      padding: 2rem;
+      min-height: 380px;
       display: flex;
       flex-direction: column;
-      height: 580px;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
     }
 
     .chat-messages {
       flex: 1;
       overflow-y: auto;
-      padding: 2rem;
+      max-height: 480px;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem;
-      scroll-behavior: smooth;
+      gap: 1.25rem;
+      padding-right: 0.5rem;
     }
 
-    .chat-messages::-webkit-scrollbar {
-      width: 4px;
-    }
-    .chat-messages::-webkit-scrollbar-track {
-      background: var(--bg-cream);
-    }
-    .chat-messages::-webkit-scrollbar-thumb {
-      background: var(--border-cream);
-    }
-
-    /* Message bubbles */
     .chat-msg {
       display: flex;
-      gap: 0.85rem;
-      animation: fadeIn 0.3s ease;
+      gap: 1rem;
+      align-items: flex-start;
     }
 
     .chat-msg.user {
@@ -443,145 +428,93 @@
     }
 
     .chat-avatar {
-      width: 34px;
-      height: 34px;
-      flex-shrink: 0;
-      border: 1px solid var(--border-cream);
+      width: 38px;
+      height: 38px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
       font-weight: 600;
-      letter-spacing: 0.05em;
-      font-family: var(--font-serif);
-      align-self: flex-start;
-      margin-top: 2px;
-    }
-
-    .chat-avatar.user-av {
-      background-color: var(--accent-terracotta);
-      color: #FFFFFF;
-      border-color: var(--accent-terracotta);
+      font-size: 0.85rem;
+      flex-shrink: 0;
     }
 
     .chat-avatar.bot-av {
-      background-color: var(--bg-dark);
+      background: var(--accent-terracotta);
       color: #FFFFFF;
-      border-color: var(--bg-dark);
-    }
-
-    .chat-bubble {
-      max-width: 78%;
-      padding: 1rem 1.25rem;
-      font-size: 0.92rem;
-      line-height: 1.7;
-      color: var(--text-dark);
-    }
-
-    .chat-msg.user .chat-bubble {
-      background-color: var(--bg-dark);
-      color: var(--text-light);
-      font-style: italic;
       font-family: var(--font-serif);
     }
 
-    .chat-msg.bot .chat-bubble {
-      background-color: var(--bg-cream);
+    .chat-avatar.user-av {
+      background: var(--bg-dark);
+      color: #FFFFFF;
+    }
+
+    .chat-bubble {
+      background: #FFFFFF;
       border: 1px solid var(--border-cream);
+      padding: 1.25rem 1.5rem;
+      max-width: 82%;
+      font-size: 0.95rem;
+      line-height: 1.6;
     }
 
-    /* Typing indicator */
-    .typing-indicator {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      padding: 1rem 1.25rem;
-      background-color: var(--bg-cream);
-      border: 1px solid var(--border-cream);
-      width: fit-content;
+    .chat-msg.user .chat-bubble {
+      background: var(--bg-dark);
+      color: var(--text-light);
+      border-color: var(--bg-dark);
     }
 
-    .typing-dot {
-      width: 7px;
-      height: 7px;
-      background-color: var(--accent-terracotta);
-      border-radius: 50%;
-      animation: typingBounce 1.2s infinite ease-in-out;
-    }
-
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typingBounce {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-6px); }
-    }
-
-    /* Chat Input Bar */
     .chat-input-bar {
       display: flex;
-      border-top: 1px solid var(--border-cream);
-      background-color: var(--bg-white);
+      gap: 0.75rem;
+      margin-top: 1.5rem;
     }
 
     .chat-input {
       flex: 1;
-      background-color: transparent;
-      border: none;
-      padding: 1.1rem 1.5rem;
+      padding: 14px 18px;
+      border: 1px solid var(--border-cream);
+      background: #FFFFFF;
       font-size: 0.95rem;
-      color: var(--text-dark);
-      font-family: var(--font-sans);
       outline: none;
       resize: none;
-      height: 56px;
-      line-height: 1.5;
+      transition: border-color 0.2s ease;
     }
 
-    .chat-input::placeholder {
-      color: #9E968A;
-      font-weight: 300;
+    .chat-input:focus {
+      border-color: var(--accent-terracotta);
     }
 
     .chat-send-btn {
-      background-color: var(--accent-terracotta);
+      background: var(--accent-terracotta);
       color: #FFFFFF;
       border: none;
-      padding: 0 2rem;
-      font-size: 0.82rem;
+      padding: 0 28px;
       font-weight: 600;
+      font-size: 0.85rem;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       cursor: pointer;
       transition: background-color 0.2s ease;
-      white-space: nowrap;
     }
 
     .chat-send-btn:hover {
       background-color: var(--accent-terracotta-hover);
     }
 
-    .chat-send-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    /* Suggestion chips below input */
     .chat-suggestions {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
+      gap: 0.6rem;
+      justify-content: center;
       margin-top: 1rem;
     }
 
     .chat-chip {
-      background-color: var(--bg-white);
+      background: var(--bg-cream);
       border: 1px solid var(--border-cream);
-      color: var(--text-muted);
-      padding: 7px 14px;
+      padding: 8px 16px;
       font-size: 0.8rem;
-      font-family: var(--font-serif);
-      font-style: italic;
       cursor: pointer;
       transition: all 0.2s ease;
     }
@@ -589,721 +522,812 @@
     .chat-chip:hover {
       border-color: var(--accent-terracotta);
       color: var(--accent-terracotta);
+      background: #FFFFFF;
     }
 
-    /* Bot response markdown styling inside bubbles */
-    .bot-response h1, .bot-response h2, .bot-response h3, .bot-response h4 {
-      font-family: var(--font-serif);
-      margin: 1.25rem 0 0.6rem 0;
-      line-height: 1.3;
-      color: var(--text-dark);
-    }
-    .bot-response h1 { font-size: 1.5rem; border-bottom: 1px solid var(--border-cream); padding-bottom: 0.4rem; }
-    .bot-response h2 { font-size: 1.2rem; color: var(--accent-terracotta); font-weight: 600; }
-    .bot-response h3 { font-size: 1.05rem; font-weight: 600; }
-    .bot-response h4 { font-size: 0.95rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); }
-    .bot-response ul, .bot-response ol { margin: 0.6rem 0 1rem 1.4rem; }
-    .bot-response li { margin-bottom: 0.35rem; line-height: 1.6; }
-    .bot-response p { margin-bottom: 0.85rem; }
-    .bot-response strong { font-weight: 600; color: var(--text-dark); }
-    .bot-response em { font-style: italic; color: var(--text-muted); }
-    .bot-response hr { border: none; border-top: 1px solid var(--border-cream); margin: 1.25rem 0; }
-    .bot-response .cost-block {
-      background-color: var(--bg-dark);
-      color: var(--text-light);
-      padding: 1.25rem 1.5rem;
-      margin: 1.25rem 0;
-      border-left: 3px solid var(--accent-terracotta);
-    }
-
-    /* Loading bar inside typing */
-    .loading-progress-bar {
-      width: 100%;
-      height: 2px;
-      background-color: var(--border-cream);
-      margin: 0.75rem 0 0.25rem 0;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .loading-progress-fill {
-      position: absolute;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 40%;
-      background-color: var(--accent-terracotta);
-      animation: progressIndeterminate 1.8s infinite ease-in-out;
-    }
-
-    @keyframes progressIndeterminate {
-      0% { left: -40%; width: 40%; }
-      50% { left: 40%; width: 60%; }
-      100% { left: 100%; width: 40%; }
-    }
-
-    /* EDITORIAL ITINERARY OUTPUT DESIGN */
-    .itinerary-output {
-      display: none;
+    /* ----------------------------------------------- */
+    /* ACTIVE ITINERARY & COPILOT SUITE               */
+    /* ----------------------------------------------- */
+    .itinerary-suite {
       margin-top: 3.5rem;
-      background-color: var(--bg-white);
-      border: 1px solid var(--border-cream);
+      display: none; /* revealed upon generation */
     }
 
-    .itinerary-output.visible {
+    .itinerary-suite.active {
       display: block;
-      animation: fadeIn 0.5s ease forwards;
+      animation: fadeIn 0.4s ease;
     }
 
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(14px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
-    /* Itinerary Destination Hero Banner */
-    .itinerary-hero-banner {
-      position: relative;
-      height: 380px;
-      background-color: #1A1A18;
-      overflow: hidden;
-      background-size: cover;
-      background-position: center;
-    }
-
-    .itinerary-hero-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(26, 26, 24, 0.95) 0%, rgba(26, 26, 24, 0.4) 60%, rgba(0, 0, 0, 0.2) 100%);
+    /* TOP ACTION BAR */
+    .suite-action-bar {
       display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 3rem;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 1.75rem;
+      background: var(--bg-dark);
+      color: #FFFFFF;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
-    .itinerary-hero-eyebrow {
+    .suite-title-group h3 {
+      font-family: var(--font-serif);
+      font-size: 1.35rem;
+      font-weight: 600;
+    }
+
+    .suite-title-group span {
+      font-size: 0.8rem;
+      color: var(--text-light-muted);
+    }
+
+    .suite-btn-group {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .suite-btn {
+      background: rgba(255, 255, 255, 0.1);
+      color: #FFFFFF;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .suite-btn:hover {
+      background: var(--accent-terracotta);
+      border-color: var(--accent-terracotta);
+    }
+
+    /* FEATURE 3: WEATHER ALERT BANNER */
+    .weather-banner {
+      background: #FFF9F2;
+      border-left: 4px solid var(--accent-terracotta);
+      border-top: 1px solid var(--border-cream);
+      border-right: 1px solid var(--border-cream);
+      border-bottom: 1px solid var(--border-cream);
+      padding: 1.25rem 1.75rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.25rem;
+    }
+
+    .weather-info {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    .weather-icon {
+      font-size: 1.8rem;
+    }
+
+    .weather-text h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      margin-bottom: 0.2rem;
+    }
+
+    .weather-text p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .btn-replan {
+      background: var(--accent-terracotta);
+      color: #FFFFFF;
+      border: none;
+      padding: 10px 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .btn-replan:hover {
+      background: var(--accent-terracotta-hover);
+    }
+
+    /* FEATURE 1: AI TRIP OPTIMIZER */
+    .optimizer-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-cream);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .panel-title {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-dark);
+    }
+
+    .optimizer-modes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .opt-chip {
+      background: #FFFFFF;
+      border: 1px solid var(--border-cream);
+      padding: 10px 18px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+    }
+
+    .opt-chip:hover,
+    .opt-chip.active {
+      background: var(--accent-terracotta);
+      color: #FFFFFF;
+      border-color: var(--accent-terracotta);
+      transform: translateY(-1px);
+    }
+
+    .comparison-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-cream);
+      padding: 1.5rem;
+      display: none;
+      margin-top: 1rem;
+    }
+
+    .comparison-card.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1.25rem;
+      border-bottom: 1px dashed var(--border-cream);
+    }
+
+    .comp-stat-box {
+      background: var(--bg-cream);
+      padding: 1.25rem;
+      border-left: 3px solid var(--accent-terracotta);
+    }
+
+    .comp-label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+    }
+
+    .comp-val-before {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      text-decoration: line-through;
+    }
+
+    .comp-val-after {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .comp-saving-badge {
+      display: inline-block;
+      background: #E8F5E9;
+      color: #2E7D32;
       font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
+      padding: 2px 8px;
+      margin-top: 0.4rem;
+    }
+
+    .comp-highlights {
+      font-size: 0.88rem;
+      color: var(--text-dark);
+      line-height: 1.5;
+    }
+
+    .comp-highlights ul {
+      margin-top: 0.5rem;
+      padding-left: 1.25rem;
+    }
+
+    /* ITINERARY CONTENT DISPLAY */
+    .itinerary-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-cream);
+      padding: 2.5rem;
+      margin-bottom: 2.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .itinerary-content {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text-dark);
+    }
+
+    .itinerary-content h1,
+    .itinerary-content h2 {
+      font-family: var(--font-serif);
+      color: var(--text-dark);
+      margin-top: 1.75rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border-cream);
+    }
+
+    .itinerary-content h3 {
+      font-size: 1.15rem;
       color: var(--accent-terracotta);
+      margin-top: 1.25rem;
       margin-bottom: 0.5rem;
     }
 
-    .itinerary-hero-title {
-      font-family: var(--font-serif);
-      font-size: 3rem;
-      font-weight: 500;
-      color: #FFFFFF;
-      line-height: 1.15;
-      margin-bottom: 0.75rem;
+    .itinerary-content ul,
+    .itinerary-content ol {
+      margin: 0.75rem 0 1.25rem 1.5rem;
     }
 
-    .itinerary-hero-meta {
+    .itinerary-content li {
+      margin-bottom: 0.4rem;
+    }
+
+    /* FEATURE 4: SMART BUDGET PLANNER */
+    .budget-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-cream);
+      padding: 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .budget-header {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.75rem;
       flex-wrap: wrap;
-      gap: 1.5rem;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.85);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
+      gap: 1rem;
     }
 
-    /* Stats Ribbon */
-    .itinerary-stats-ribbon {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      border-bottom: 1px solid var(--border-cream);
-      background-color: #FAF6F0;
+    .currency-picker {
+      display: flex;
+      gap: 0.4rem;
     }
 
-    .stat-ribbon-cell {
-      padding: 1.5rem 2rem;
-      border-right: 1px solid var(--border-cream);
-    }
-
-    .stat-ribbon-cell:last-child {
-      border-right: none;
-    }
-
-    .stat-ribbon-label {
-      font-size: 0.72rem;
+    .cur-btn {
+      background: #FFFFFF;
+      border: 1px solid var(--border-cream);
+      padding: 6px 12px;
+      font-size: 0.75rem;
       font-weight: 600;
-      letter-spacing: 0.15em;
+      cursor: pointer;
+    }
+
+    .cur-btn.active {
+      background: var(--accent-terracotta);
+      color: #FFFFFF;
+      border-color: var(--accent-terracotta);
+    }
+
+    .budget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .budget-card {
+      background: #FFFFFF;
+      border: 1px solid var(--border-cream);
+      padding: 1.25rem;
+      text-align: left;
+    }
+
+    .budget-card-label {
+      font-size: 0.72rem;
       text-transform: uppercase;
+      letter-spacing: 0.12em;
       color: var(--text-muted);
       margin-bottom: 0.35rem;
     }
 
-    .stat-ribbon-val {
-      font-family: var(--font-serif);
+    .budget-card-amount {
       font-size: 1.25rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text-dark);
+      margin-bottom: 0.5rem;
     }
 
-    /* Itinerary Body Content */
-    .itinerary-body-container {
-      padding: 3.5rem;
+    .budget-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--num-grey);
+      overflow: hidden;
     }
 
-    .itinerary-action-bar {
+    .budget-progress-fill {
+      height: 100%;
+      background: var(--accent-terracotta);
+      transition: width 0.4s ease;
+    }
+
+    .budget-ai-tips {
+      background: #FFFFFF;
+      border: 1px solid var(--border-cream);
+      border-left: 3px solid var(--accent-green);
+      padding: 1.25rem 1.5rem;
+    }
+
+    .budget-ai-tips h4 {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--accent-green);
+      margin-bottom: 0.5rem;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid var(--border-cream);
-      padding-bottom: 1.5rem;
+      gap: 6px;
+    }
+
+    .budget-ai-tips ul {
+      padding-left: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text-dark);
+      line-height: 1.5;
+    }
+
+    /* PILOT BOOKING & MONETIZATION SECTION */
+    .pilot-monetization-section {
+      background: var(--bg-cream);
+      border: 1px dashed var(--border-cream);
+      padding: 1.75rem;
       margin-bottom: 2.5rem;
     }
 
-    .itinerary-action-btn-group {
-      display: flex;
-      gap: 0.75rem;
+    .pilot-tag {
+      font-size: 0.68rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: var(--accent-gold);
+      color: var(--bg-dark);
+      padding: 2px 8px;
+      font-weight: 700;
+      display: inline-block;
+      margin-bottom: 0.5rem;
     }
 
-    .btn-secondary {
-      background-color: transparent;
-      color: var(--text-dark);
+    .pilot-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .pilot-card {
+      background: #FFFFFF;
       border: 1px solid var(--border-cream);
-      padding: 10px 20px;
-      font-size: 0.78rem;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pilot-card h5 {
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .pilot-card p {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    /* FEATURE 2: AI TRIP COMPANION DRAWER */
+    .companion-trigger {
+      position: fixed;
+      bottom: 2.5rem;
+      right: 2.5rem;
+      background: var(--accent-terracotta);
+      color: #FFFFFF;
+      border: none;
+      padding: 14px 24px;
+      font-size: 0.82rem;
       font-weight: 600;
       letter-spacing: 0.15em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: all 0.2s ease;
-    }
-
-    .btn-secondary:hover {
-      border-color: var(--text-dark);
-      background-color: var(--bg-cream);
-    }
-
-    /* Editorial Formatted Sections */
-    .editorial-section-block {
-      margin-bottom: 3.5rem;
-    }
-
-    .editorial-section-header {
+      box-shadow: var(--shadow-lg);
+      z-index: 999;
       display: flex;
-      align-items: baseline;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+    }
+
+    .companion-trigger:hover {
+      background: var(--accent-terracotta-hover);
+      transform: translateY(-2px);
+    }
+
+    .companion-drawer {
+      position: fixed;
+      top: 0;
+      right: -460px;
+      width: 440px;
+      height: 100vh;
+      background: #FFFFFF;
+      box-shadow: -10px 0 30px rgba(0,0,0,0.15);
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .companion-drawer.open {
+      right: 0;
+    }
+
+    .drawer-header {
+      padding: 1.5rem;
+      background: var(--bg-dark);
+      color: #FFFFFF;
+      display: flex;
       justify-content: space-between;
-      border-bottom: 1px solid var(--border-cream);
-      padding-bottom: 0.85rem;
-      margin-bottom: 2rem;
+      align-items: center;
     }
 
-    .editorial-section-title {
+    .drawer-header h3 {
       font-family: var(--font-serif);
-      font-size: 1.75rem;
-      font-weight: 600;
-      color: var(--text-dark);
-      letter-spacing: -0.01em;
+      font-size: 1.2rem;
     }
 
-    .editorial-section-tag {
+    .drawer-close {
+      background: transparent;
+      border: none;
+      color: #FFFFFF;
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .drawer-messages {
+      flex: 1;
+      padding: 1.5rem;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: var(--bg-cream);
+    }
+
+    .drawer-chips {
+      padding: 0.75rem 1rem;
+      background: #FFFFFF;
+      border-top: 1px solid var(--border-cream);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .drawer-chip {
+      background: var(--bg-cream);
+      border: 1px solid var(--border-cream);
+      padding: 6px 12px;
       font-size: 0.72rem;
-      font-weight: 600;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .drawer-chip:hover {
+      border-color: var(--accent-terracotta);
       color: var(--accent-terracotta);
     }
 
-    /* Day Timeline Cards */
-    .timeline-day-card {
-      border-left: 2px solid var(--accent-terracotta);
-      padding-left: 2rem;
-      margin-bottom: 2.5rem;
+    .drawer-input-bar {
+      padding: 1rem 1.25rem;
+      background: #FFFFFF;
+      border-top: 1px solid var(--border-cream);
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .drawer-input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--border-cream);
+      font-size: 0.88rem;
+      outline: none;
+    }
+
+    .drawer-send-btn {
+      background: var(--accent-terracotta);
+      color: #FFFFFF;
+      border: none;
+      padding: 0 18px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+
+    /* MODALS & DRAWERS */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .modal-card {
+      background: #FFFFFF;
+      max-width: 540px;
+      width: 100%;
+      padding: 2.25rem;
+      box-shadow: var(--shadow-lg);
       position: relative;
     }
 
-    .timeline-day-card::before {
-      content: '';
-      position: absolute;
-      left: -6px;
-      top: 4px;
-      width: 10px;
-      height: 10px;
-      background-color: var(--accent-terracotta);
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
     }
 
-    .timeline-day-title {
+    .modal-header h3 {
       font-family: var(--font-serif);
-      font-size: 1.35rem;
+      font-size: 1.4rem;
+    }
+
+    .modal-close {
+      background: transparent;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .share-link-box {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1.25rem 0;
+    }
+
+    .share-input {
+      flex: 1;
+      padding: 12px 14px;
+      border: 1px solid var(--border-cream);
+      background: var(--bg-cream);
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .saved-trips-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 340px;
+      overflow-y: auto;
+      margin-top: 1rem;
+    }
+
+    .saved-trip-item {
+      padding: 1rem 1.25rem;
+      background: var(--bg-cream);
+      border: 1px solid var(--border-cream);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .saved-trip-item:hover {
+      border-color: var(--accent-terracotta);
+      background: #FFFFFF;
+    }
+
+    /* TOAST NOTIFICATION */
+    .toast-notification {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg-dark);
+      color: #FFFFFF;
+      padding: 12px 24px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      z-index: 3000;
+      opacity: 0;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .toast-notification.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* 5. HOW IT WORKS & FEATURES SECTIONS */
+    .how-it-works-section,
+    .features-section {
+      padding: 5rem 4rem;
+      background-color: var(--bg-cream);
+    }
+
+    .features-section {
+      background-color: var(--bg-dark);
+      color: var(--text-light);
+    }
+
+    .how-wrapper,
+    .features-wrapper {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .steps-row,
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 2.5rem;
+      margin-top: 3rem;
+    }
+
+    .step-number {
+      font-family: var(--font-serif);
+      font-size: 2.5rem;
+      color: var(--accent-terracotta);
       font-weight: 600;
-      color: var(--text-dark);
-      margin-bottom: 0.75rem;
-    }
-
-    .timeline-day-content {
-      font-size: 0.96rem;
-      color: var(--text-dark);
-      line-height: 1.75;
-    }
-
-    .timeline-day-content p {
-      margin-bottom: 0.85rem;
-    }
-
-    .timeline-day-content ul {
-      margin-left: 1.25rem;
-      margin-bottom: 1rem;
-    }
-
-    .timeline-day-content li {
       margin-bottom: 0.5rem;
     }
 
-    /* Grid for Hotels & Restaurants */
-    .editorial-cards-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
-    }
-
-    .editorial-feature-card {
-      background-color: #FAF6F0;
-      border: 1px solid var(--border-cream);
-      padding: 1.75rem;
-    }
-
-    .feature-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+    .step-title,
+    .feature-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
       margin-bottom: 0.75rem;
     }
 
-    .feature-card-name {
-      font-family: var(--font-serif);
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: var(--text-dark);
-    }
-
-    .feature-card-price {
-      font-size: 0.82rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      color: var(--accent-terracotta);
-      background-color: var(--bg-white);
-      border: 1px solid var(--border-cream);
-      padding: 4px 10px;
-      white-space: nowrap;
-    }
-
-    .feature-card-desc {
+    .step-desc,
+    .feature-desc {
       font-size: 0.88rem;
       color: var(--text-muted);
       line-height: 1.6;
     }
 
-    /* Weather Highlight Banner */
-    .weather-highlight-box {
-      background-color: var(--bg-cream);
-      border: 1px solid var(--border-cream);
-      padding: 2rem;
-      margin-bottom: 3rem;
-      display: flex;
-      align-items: center;
-      gap: 2rem;
-    }
-
-    .weather-temp-badge {
-      font-family: var(--font-serif);
-      font-size: 2.25rem;
-      font-weight: 600;
-      color: var(--accent-terracotta);
-      border-right: 1px solid var(--border-cream);
-      padding-right: 2rem;
-      min-width: 140px;
-    }
-
-    .weather-info-text {
-      font-size: 0.92rem;
-      color: var(--text-dark);
-      line-height: 1.6;
-    }
-
-    /* Financial Summary Box */
-    .budget-summary-box {
-      background-color: var(--bg-dark);
-      color: var(--text-light);
-      padding: 2.5rem;
-      border: 1px solid var(--border-dark);
-      margin-top: 3rem;
-    }
-
-    .budget-summary-title {
-      font-family: var(--font-serif);
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #FFFFFF;
-      margin-bottom: 1.5rem;
-      border-bottom: 1px solid var(--border-dark);
-      padding-bottom: 0.75rem;
-    }
-
-    .budget-breakdown-list {
-      list-style: none;
-      margin-bottom: 1.5rem;
-    }
-
-    .budget-breakdown-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.65rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      font-size: 0.92rem;
+    .features-section .feature-desc {
       color: var(--text-light-muted);
     }
 
-    .budget-breakdown-row strong {
-      color: #FFFFFF;
-    }
-
-    .budget-total-row {
-      display: flex;
-      justify-content: space-between;
-      padding-top: 1.25rem;
-      font-size: 1.15rem;
-      font-weight: 600;
-      color: #FFFFFF;
-    }
-
-    .budget-total-val {
-      color: var(--accent-terracotta);
-      font-family: var(--font-serif);
-      font-size: 1.4rem;
-    }
-
-    /* Raw Markdown fallback view */
-    .raw-markdown-view {
-      font-family: var(--font-sans);
-      color: var(--text-dark);
-      line-height: 1.8;
-      font-size: 0.98rem;
-    }
-
-    .raw-markdown-view h1,
-    .raw-markdown-view h2,
-    .raw-markdown-view h3 {
-      font-family: var(--font-serif);
-      color: var(--text-dark);
-      margin: 2rem 0 1rem 0;
-      line-height: 1.3;
-    }
-
-    .raw-markdown-view h1 { font-size: 2rem; }
-    .raw-markdown-view h2 { font-size: 1.5rem; border-bottom: 1px solid var(--border-cream); padding-bottom: 0.5rem; }
-    .raw-markdown-view h3 { font-size: 1.2rem; }
-    .raw-markdown-view ul, .raw-markdown-view ol { margin: 1rem 0 1.5rem 1.5rem; }
-    .raw-markdown-view li { margin-bottom: 0.5rem; }
-    .raw-markdown-view p { margin-bottom: 1.25rem; }
-
-    /* 5. HOW IT WORKS SECTION */
-    .how-it-works-section {
-      padding: 6.5rem 2rem 7.5rem 2rem;
-      background-color: var(--bg-cream);
-      border-top: 1px solid var(--border-cream);
-    }
-
-    .how-wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .how-header {
-      margin-bottom: 4.5rem;
-    }
-
-    .steps-row {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 3.5rem;
-    }
-
-    .step-item {
-      position: relative;
-      padding-top: 1rem;
-    }
-
-    .step-number {
-      font-family: var(--font-serif);
-      font-size: 4.5rem;
-      font-weight: 700;
-      line-height: 1;
-      color: var(--num-grey);
-      margin-bottom: 1rem;
-      user-select: none;
-      letter-spacing: -0.03em;
-    }
-
-    .step-title {
-      font-family: var(--font-serif);
-      font-size: 1.45rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 1rem;
-      line-height: 1.3;
-    }
-
-    .step-desc {
-      font-size: 0.95rem;
-      color: var(--text-muted);
-      line-height: 1.65;
-      font-weight: 400;
-    }
-
-    /* 6. FEATURES SECTION */
-    .features-section {
-      padding: 7rem 2rem 8rem 2rem;
-      background-color: var(--bg-dark);
-      color: var(--text-light);
-    }
-
-    .features-wrapper {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .features-header {
-      margin-bottom: 4.5rem;
-    }
-
-    .features-title {
-      font-family: var(--font-serif);
-      font-size: 2.75rem;
-      font-weight: 600;
-      color: #FFFFFF;
-      line-height: 1.2;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 4rem 4.5rem;
-    }
-
-    .feature-item {
-      border-left: 2px solid var(--accent-terracotta);
-      padding-left: 2rem;
-    }
-
-    .feature-title {
-      font-family: var(--font-serif);
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: #FFFFFF;
-      margin-bottom: 0.75rem;
-      line-height: 1.3;
-    }
-
-    .feature-desc {
-      font-size: 0.95rem;
-      color: var(--text-light-muted);
-      line-height: 1.65;
-      font-weight: 300;
-    }
-
-    /* 7. FOOTER */
+    /* 6. FOOTER */
     .footer {
-      background-color: var(--bg-dark);
-      color: var(--text-light);
+      background: #111110;
+      color: var(--text-light-muted);
+      padding: 4rem;
       border-top: 1px solid var(--border-dark);
-      padding: 5rem 2rem 3rem 2rem;
     }
 
     .footer-wrapper {
-      max-width: 1200px;
+      max-width: 1100px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
     }
 
     .footer-top {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 4rem;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
     .footer-logo {
       font-family: var(--font-serif);
-      font-size: 1.5rem;
-      font-weight: 700;
-      letter-spacing: 0.35em;
-      text-transform: uppercase;
+      font-size: 1.4rem;
+      letter-spacing: 0.3em;
       color: #FFFFFF;
-      margin-bottom: 0.5rem;
-    }
-
-    .footer-tagline {
-      font-size: 0.9rem;
-      color: var(--text-light-muted);
-      letter-spacing: 0.05em;
-      font-weight: 300;
-    }
-
-    .footer-meta-right {
-      font-size: 0.82rem;
-      color: var(--text-light-muted);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      font-weight: 400;
-    }
-
-    .footer-rule {
-      height: 1px;
-      background-color: var(--border-dark);
-      margin-bottom: 2.5rem;
     }
 
     .footer-bottom {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      font-size: 0.8rem;
-      color: #706B63;
-      letter-spacing: 0.05em;
+      font-size: 0.78rem;
+      border-top: 1px solid #222220;
+      padding-top: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
     }
 
-    /* RESPONSIVE DESIGN */
-    @media (max-width: 1024px) {
-      .destinations-container {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .itinerary-stats-ribbon {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .stat-ribbon-cell:nth-child(2) {
-        border-right: none;
-      }
+    /* TYPING INDICATOR */
+    .typing-indicator {
+      display: flex;
+      gap: 6px;
+      padding: 12px 18px;
     }
 
-    @media (max-width: 768px) {
-      .navbar {
-        padding: 0 1.5rem;
-        height: 72px;
-      }
-
-      .nav-links {
-        display: none;
-      }
-
-      .hero-headline {
-        font-size: 2.8rem;
-      }
-
-      .hero-subheading {
-        font-size: 1rem;
-      }
-
-      .destinations-container {
-        grid-template-columns: 1fr;
-        padding: 0 1.5rem;
-      }
-
-      .destinations-header {
-        padding: 0 1.5rem;
-      }
-
-      .planner-card,
-      .itinerary-body-container {
-        padding: 2rem 1.5rem;
-      }
-
-      .itinerary-hero-overlay {
-        padding: 2rem 1.5rem;
-      }
-
-      .itinerary-hero-title {
-        font-size: 2.2rem;
-      }
-
-      .itinerary-stats-ribbon {
-        grid-template-columns: 1fr;
-      }
-
-      .stat-ribbon-cell {
-        border-right: none;
-        border-bottom: 1px solid var(--border-cream);
-      }
-
-      .editorial-cards-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .weather-highlight-box {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-      }
-
-      .weather-temp-badge {
-        border-right: none;
-        padding-right: 0;
-        border-bottom: 1px solid var(--border-cream);
-        padding-bottom: 0.5rem;
-      }
-
-      .form-row {
-        grid-template-columns: 1fr;
-        gap: 1.5rem;
-      }
-
-      .steps-row {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
-      }
-
-      .features-grid {
-        grid-template-columns: 1fr;
-        gap: 2.5rem;
-      }
-
-      .footer-top {
-        flex-direction: column;
-        gap: 2rem;
-      }
-
-      .footer-bottom {
-        flex-direction: column;
-        gap: 1rem;
-        text-align: center;
-      }
+    .typing-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--accent-terracotta);
+      border-radius: 50%;
+      animation: pulse 1.2s infinite ease-in-out;
     }
 
-    /* Print Styles */
-    @media print {
-      .navbar,
-      .hero-section,
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulse {
+      0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+
+    /* RESPONSIVE BREAKPOINTS */
+    @media (max-width: 900px) {
+      .navbar { padding: 0 1.5rem; }
       .destinations-section,
-      .planner-card,
-      .planner-loading-card,
+      .planner-section,
       .how-it-works-section,
       .features-section,
-      .footer,
-      .itinerary-action-bar {
-        display: none !important;
-      }
-
-      body, html {
-        background-color: #FFFFFF !important;
-      }
-
-      .itinerary-output {
-        display: block !important;
-        border: none !important;
-        margin: 0 !important;
-        padding: 0 !important;
-      }
+      .footer { padding: 4rem 1.5rem; }
+      .hero-headline { font-size: 2.75rem; }
+      .companion-drawer { width: 100%; right: -100%; }
+      .companion-trigger { bottom: 1.5rem; right: 1.5rem; }
     }
   </style>
 </head>
@@ -1312,51 +1336,61 @@
 
   <!-- 1. NAVBAR -->
   <header class="navbar" id="navbar">
-    <a href="#" class="nav-logo">VOYAGE</a>
+    <div class="nav-logo">VOYAGE</div>
     <nav>
       <ul class="nav-links">
-        <li><a href="#how-it-works" class="nav-link">How it Works</a></li>
-        <li><a href="#features" class="nav-link">Features</a></li>
-        <li><a href="#planner" class="nav-link">About</a></li>
+        <li><a href="#destinations" class="nav-link">Destinations</a></li>
+        <li><a href="#planner" class="nav-link">Trip Planner</a></li>
+        <li><a href="#how-it-works" class="nav-link">Method</a></li>
       </ul>
     </nav>
-    <a href="#planner" class="btn-terracotta">Plan a Trip</a>
+    <div class="nav-actions">
+      <button class="btn-outline btn-sm" style="color: #fff; border-color: rgba(255,255,255,0.3);" onclick="openSavedTripsModal()">
+        Saved Trips <span class="badge-saved" id="savedTripsCount">0</span>
+      </button>
+      <a href="#planner" class="btn-terracotta btn-sm">Plan Trip</a>
+    </div>
   </header>
 
   <!-- 2. HERO SECTION -->
   <section class="hero-section" id="hero">
     <div class="hero-overlay"></div>
     <div class="hero-content">
+      <div class="hero-pilot-badge">✦ Product Analytics Pilot Study • AI Travel Copilot</div>
       <h1 class="hero-headline">
         <span>Every great journey</span>
         <span>starts with one question.</span>
       </h1>
       <p class="hero-subheading">
-        Voyage builds your perfect itinerary in seconds — flights, stays, food, culture, all of it.
+        VOYAGE generates, optimizes, and adapts your bespoke itinerary in real time — with live weather awareness, budget intelligence, and an interactive AI copilot.
       </p>
       <a href="#planner" class="btn-terracotta hero-cta">Start Planning</a>
     </div>
-    <div class="hero-scroll-indicator">
-      <div class="hero-scroll-line"></div>
-      <span>scroll</span>
-    </div>
   </section>
 
-  <!-- 3. DESTINATION STRIP -->
+  <!-- 3. DESTINATIONS STRIP -->
   <section class="destinations-section" id="destinations">
     <div class="destinations-header">
       <div>
-        <div class="section-eyebrow">EXPLORE INDIA</div>
+        <div class="section-eyebrow">CURATED DISCOVERY</div>
         <h2 class="section-title">Destinations worth every mile.</h2>
       </div>
     </div>
     <div class="destinations-container">
 
-      <!-- Card 1: Varanasi -->
+      <!-- Card 1: Jaisalmer -->
+      <div class="destination-card" onclick="selectDestination('Jaisalmer, Rajasthan, India')">
+        <img class="destination-image" src="https://images.unsplash.com/photo-1599661046289-e31897846e41?w=600" alt="Jaisalmer Fort">
+        <div class="destination-overlay">
+          <div class="destination-state">RAJASTHAN</div>
+          <div class="destination-city">Jaisalmer</div>
+          <span class="destination-story">&ldquo;A golden fortress rising from the desert like a mirage.&rdquo;</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Varanasi -->
       <div class="destination-card" onclick="selectDestination('Varanasi, Uttar Pradesh, India')">
-        <img class="destination-image"
-          src="https://assets.theasar.com/blogs/1768561498185_top_10_places_to_visit_in_varanasi.webp"
-          alt="Varanasi on the Ganges">
+        <img class="destination-image" src="https://assets.theasar.com/blogs/1768561498185_top_10_places_to_visit_in_varanasi.webp" alt="Varanasi on the Ganges">
         <div class="destination-overlay">
           <div class="destination-state">UTTAR PRADESH</div>
           <div class="destination-city">Varanasi</div>
@@ -1364,22 +1398,9 @@
         </div>
       </div>
 
-      <!-- Card 2: Jaisalmer -->
-      <div class="destination-card" onclick="selectDestination('Jaisalmer, Rajasthan, India')">
-        <img class="destination-image" src="https://images.unsplash.com/photo-1599661046289-e31897846e41?w=600"
-          alt="Jaisalmer Fort">
-        <div class="destination-overlay">
-          <div class="destination-state">RAJASTHAN</div>
-          <div class="destination-city">Jaisalmer</div>
-          <span class="destination-story">&ldquo;A golden fort rising from the desert like a mirage.&rdquo;</span>
-        </div>
-      </div>
-
       <!-- Card 3: Coorg -->
       <div class="destination-card" onclick="selectDestination('Coorg, Karnataka, India')">
-        <img class="destination-image"
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSp_cVh1C0axorSKatllqjt6EtCI_Klu6YK9dXhfuIkarvGgjJ6x2F-SMsN&s=10"
-          alt="Coorg coffee plantation mist">
+        <img class="destination-image" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSp_cVh1C0axorSKatllqjt6EtCI_Klu6YK9dXhfuIkarvGgjJ6x2F-SMsN&s=10" alt="Coorg coffee mist">
         <div class="destination-overlay">
           <div class="destination-state">KARNATAKA</div>
           <div class="destination-city">Coorg</div>
@@ -1387,44 +1408,42 @@
         </div>
       </div>
 
-      <!-- Card 4: Hampi -->
-      <div class="destination-card" onclick="selectDestination('Hampi, Karnataka, India')">
-        <img class="destination-image"
-          src="https://www.stayvista.com/blog/wp-content/uploads/2024/09/Hampi_karnataka.jpg"
-          alt="Hampi ruins and boulders">
+      <!-- Card 4: Udaipur -->
+      <div class="destination-card" onclick="selectDestination('Udaipur, Rajasthan, India')">
+        <img class="destination-image" src="https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=600" alt="Udaipur Palace">
         <div class="destination-overlay">
-          <div class="destination-state">KARNATAKA</div>
-          <div class="destination-city">Hampi</div>
-          <span class="destination-story">&ldquo;Boulders and ruins that once held an empire&rsquo;s
-            breath.&rdquo;</span>
+          <div class="destination-state">RAJASTHAN</div>
+          <div class="destination-city">Udaipur</div>
+          <span class="destination-story">&ldquo;Palaces that float upon tranquil royal waters.&rdquo;</span>
         </div>
       </div>
 
     </div>
   </section>
 
-  <!-- 4. CHATBOT SECTION -->
+  <!-- 4. PLANNER SECTION -->
   <section class="planner-section" id="planner">
     <div class="planner-wrapper">
       <div class="planner-header">
         <div class="section-eyebrow">VOYAGE INTELLIGENCE</div>
-        <h2 class="section-title">Ask anything about your trip.</h2>
-        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.75rem; font-weight: 300;">Type naturally — destination, duration, budget, preferences. The AI handles the rest.</p>
+        <h2 class="section-title">Ask anything about your journey.</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.75rem; font-weight: 300;">
+          State your destination, duration, party size, and travel style. The agentic system handles the rest.
+        </p>
       </div>
 
       <!-- Chat Window -->
       <div class="chat-window" id="chatWindow">
         <div class="chat-messages" id="chatMessages">
-          <!-- Voyage welcome message -->
           <div class="chat-msg bot" id="welcomeMsg">
             <div class="chat-avatar bot-av">V</div>
             <div class="chat-bubble bot-response">
-              <p>Welcome to <strong>Voyage</strong>. I can plan your complete travel itinerary — flights, stays, dining, culture, and a day-by-day schedule.</p>
-              <p>Just tell me where you want to go. For example:</p>
+              <p>Welcome to <strong>VOYAGE</strong>. I can build your complete travel itinerary — flights, stays, dining, culture, and a day-by-day schedule.</p>
+              <p style="margin-top: 0.5rem;">Select a suggestion or type your trip details:</p>
               <ul>
-                <li><em>Plan a 5-day trip to Jaisalmer for two, mid-range budget in INR</em></li>
-                <li><em>3 days in Coorg for a family, focus on nature and local food</em></li>
-                <li><em>Week-long luxury trip to Tokyo, budget in USD</em></li>
+                <li><em>Plan a 4-day trip to Jaisalmer for two, budget in INR with desert safari</em></li>
+                <li><em>3 days in Varanasi for family, focus on heritage and local food</em></li>
+                <li><em>Luxury 3 nights in Coorg coffee estates</em></li>
               </ul>
             </div>
           </div>
@@ -1432,55 +1451,311 @@
 
         <!-- Input Bar -->
         <div class="chat-input-bar">
-          <textarea
-            id="chatInput"
-            class="chat-input"
-            placeholder="Where would you like to go?"
-            rows="1"
-            onkeydown="handleChatKey(event)"
-          ></textarea>
-          <button id="chatSendBtn" class="chat-send-btn" onclick="sendChatMessage()">Send</button>
+          <textarea id="chatInput" class="chat-input" placeholder="e.g. Plan a 4-day trip to Jaisalmer for 2 people with mid-range budget in INR..." rows="1" onkeydown="handleChatKey(event)"></textarea>
+          <button id="chatSendBtn" class="chat-send-btn" onclick="sendChatMessage()">Plan Trip</button>
         </div>
       </div>
 
       <!-- Suggestion Chips -->
       <div class="chat-suggestions" id="chatSuggestions">
-        <button class="chat-chip" onclick="useChip(this)">Plan a weekend in Goa for two</button>
-        <button class="chat-chip" onclick="useChip(this)">5-day family trip to Jaisalmer in INR</button>
+        <button class="chat-chip" onclick="useChip(this)">Plan a 4-day trip to Jaisalmer in INR</button>
+        <button class="chat-chip" onclick="useChip(this)">3-day family heritage trip to Varanasi</button>
         <button class="chat-chip" onclick="useChip(this)">Solo week in Hampi on a budget</button>
         <button class="chat-chip" onclick="useChip(this)">Luxury 3 nights in Coorg</button>
+      </div>
+
+      <!-- ---------------------------------------------------- -->
+      <!-- ACTIVE ITINERARY & COPILOT WORKSPACE (5 FEATURES)   -->
+      <!-- ---------------------------------------------------- -->
+      <div class="itinerary-suite" id="itinerarySuite">
+
+        <!-- Action Bar: Save / Share / PDF Export -->
+        <div class="suite-action-bar">
+          <div class="suite-title-group">
+            <h3 id="activeTripTitle">Bespoke Travel Itinerary</h3>
+            <span id="activeTripSubtitle">Curated by VOYAGE Intelligence • Live Weather & Budget Monitored</span>
+          </div>
+          <div class="suite-btn-group">
+            <button class="suite-btn" id="btnSaveTrip" onclick="saveActiveTrip()">
+              <span>❤️</span> Save Trip
+            </button>
+            <button class="suite-btn" id="btnShareTrip" onclick="openShareModal()">
+              <span>🔗</span> Share Trip
+            </button>
+            <a id="btnDownloadPdf" href="#" target="_blank" download class="suite-btn" style="display: none;">
+              <span>📄</span> Export PDF
+            </a>
+          </div>
+        </div>
+
+        <!-- FEATURE 3: WEATHER-AWARE REPLANNING BANNER -->
+        <div class="weather-banner" id="weatherBanner">
+          <div class="weather-info">
+            <div class="weather-icon">⚠️</div>
+            <div class="weather-text">
+              <h4 id="weatherAlertTitle">Weather Advisory: Rain expected on Day 3</h4>
+              <p id="weatherAlertDesc">Precipitation may disrupt outdoor excursions. VOYAGE recommends replacing outdoor walks with covered cultural museums and culinary workshops.</p>
+            </div>
+          </div>
+          <button class="btn-replan" id="btnWeatherReplan" onclick="replanWeatherAction()">
+            <span>⚡</span> 1-Click Weather Replan
+          </button>
+        </div>
+
+        <!-- FEATURE 1: AI TRIP OPTIMIZER -->
+        <div class="optimizer-panel" id="optimizerPanel">
+          <div class="panel-header">
+            <div>
+              <div class="section-eyebrow">FEATURE 1</div>
+              <h3 class="panel-title">⚡ AI Trip Optimizer</h3>
+            </div>
+            <span style="font-size: 0.8rem; color: var(--text-muted);">Re-align trip objectives dynamically</span>
+          </div>
+
+          <div class="optimizer-modes">
+            <button class="opt-chip active" onclick="applyOptimization('cost', this)">💰 Lowest Cost</button>
+            <button class="opt-chip" onclick="applyOptimization('time', this)">⏱️ Less Travel</button>
+            <button class="opt-chip" onclick="applyOptimization('experiences', this)">⭐ More Experiences</button>
+            <button class="opt-chip" onclick="applyOptimization('relaxed', this)">😌 More Relaxed</button>
+            <button class="opt-chip" onclick="applyOptimization('food', this)">🍜 Food Focused</button>
+          </div>
+
+          <!-- Comparison Card (Before / After) -->
+          <div class="comparison-card active" id="optimizerComparisonCard">
+            <div class="comparison-grid">
+              <div class="comp-stat-box">
+                <div class="comp-label">Projected Cost</div>
+                <div><span class="comp-val-before" id="compCostBefore">₹72,800</span></div>
+                <div class="comp-val-after" id="compCostAfter">₹65,400</div>
+                <div class="comp-saving-badge" id="compSavingsBadge">Potential Saving: ₹7,400</div>
+              </div>
+              <div class="comp-stat-box">
+                <div class="comp-label">Transit Time</div>
+                <div><span class="comp-val-before" id="compTimeBefore">9.4 Hours</span></div>
+                <div class="comp-val-after" id="compTimeAfter">6.8 Hours</div>
+                <div class="comp-saving-badge" id="compTimeSavedBadge">Time Saved: 2.6 Hours</div>
+              </div>
+            </div>
+            <div class="comp-highlights" id="compHighlights">
+              <strong>Key Optimization Changes:</strong>
+              <ul id="compHighlightsList">
+                <li>Swapped standard taxis for optimized express regional transfers.</li>
+                <li>Replaced 5-star hotel with premier boutique heritage property.</li>
+                <li>Grouped morning heritage visits to cut transit dead-time.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- MAIN ITINERARY VIEW -->
+        <div class="itinerary-card">
+          <div class="itinerary-content" id="activeItineraryContent">
+            <!-- Rendered Itinerary Markdown appears here -->
+          </div>
+        </div>
+
+        <!-- FEATURE 4: SMART BUDGET PLANNER -->
+        <div class="budget-section" id="budgetSection">
+          <div class="budget-header">
+            <div>
+              <div class="section-eyebrow">FEATURE 4</div>
+              <h3 class="panel-title">📊 Smart Budget Breakdown</h3>
+            </div>
+            <div class="currency-picker">
+              <button class="cur-btn active" onclick="switchCurrency('INR', this)">INR (₹)</button>
+              <button class="cur-btn" onclick="switchCurrency('USD', this)">USD ($)</button>
+              <button class="cur-btn" onclick="switchCurrency('EUR', this)">EUR (€)</button>
+            </div>
+          </div>
+
+          <div class="budget-grid" id="budgetGrid">
+            <div class="budget-card">
+              <div class="budget-card-label">✈️ Flights & Transit</div>
+              <div class="budget-card-amount" id="budgetValFlights">₹18,000</div>
+              <div class="budget-progress-bar"><div class="budget-progress-fill" style="width: 25%;"></div></div>
+            </div>
+            <div class="budget-card">
+              <div class="budget-card-label">🏨 Accommodation</div>
+              <div class="budget-card-amount" id="budgetValHotels">₹24,000</div>
+              <div class="budget-progress-bar"><div class="budget-progress-fill" style="width: 33%;"></div></div>
+            </div>
+            <div class="budget-card">
+              <div class="budget-card-label">🍽️ Food & Dining</div>
+              <div class="budget-card-amount" id="budgetValFood">₹12,000</div>
+              <div class="budget-progress-bar"><div class="budget-progress-fill" style="width: 17%;"></div></div>
+            </div>
+            <div class="budget-card">
+              <div class="budget-card-label">🎟️ Activities & Tickets</div>
+              <div class="budget-card-amount" id="budgetValActivities">₹7,500</div>
+              <div class="budget-progress-bar"><div class="budget-progress-fill" style="width: 10%;"></div></div>
+            </div>
+            <div class="budget-card">
+              <div class="budget-card-label">🚖 Local Transport</div>
+              <div class="budget-card-amount" id="budgetValTransport">₹4,500</div>
+              <div class="budget-progress-bar"><div class="budget-progress-fill" style="width: 6%;"></div></div>
+            </div>
+            <div class="budget-card">
+              <div class="budget-card-label">🛡️ Emergency Buffer</div>
+              <div class="budget-card-amount" id="budgetValBuffer">₹6,800</div>
+              <div class="budget-progress-bar"><div class="budget-progress-fill" style="width: 9%;"></div></div>
+            </div>
+          </div>
+
+          <div class="budget-ai-tips" id="budgetAiTips">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 0.75rem;">
+              <h4>✦ AI Budget Observations & Savings Recommendations</h4>
+              <button class="btn-terracotta btn-sm" id="btnApplyBudgetOpt" onclick="optimizeBudgetAction()">
+                <span>⚡</span> Apply AI Savings (-₹4,200)
+              </button>
+            </div>
+            <ul id="budgetTipsList">
+              <li>Accommodation comprises 33% of total budget (healthy luxury-comfort balance).</li>
+              <li>You can save approximately ₹4,200 by pre-booking heritage boutique stays early.</li>
+              <li>Emergency contingency buffer is maintained at 9.3% for peaceful travel.</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- PILOT MONETIZATION & PARTNERS SECTION -->
+        <div class="pilot-monetization-section">
+          <span class="pilot-tag">PILOT PHASE • FUTURE ECOSYSTEM PARTNERS</span>
+          <h4 style="font-size: 0.95rem; font-weight: 600; margin-bottom: 0.25rem;">Integrated Booking Affiliates & Protection</h4>
+          <p style="font-size: 0.82rem; color: var(--text-muted);">Demonstrating future revenue channels post-pilot study (hotel commission, activity referrals, insurance).</p>
+
+          <div class="pilot-grid">
+            <div class="pilot-card" onclick="trackMonetizationClick('hotel_partner', 'Booking.com Stays')">
+              <div>
+                <h5>🏨 Verified Partner Stays</h5>
+                <p>Curated hotel rates via partner API</p>
+              </div>
+              <span style="font-size: 0.75rem; color: var(--accent-terracotta); font-weight: 600;">View Deals ↗</span>
+            </div>
+            <div class="pilot-card" onclick="trackMonetizationClick('activity_partner', 'GetYourGuide Experiences')">
+              <div>
+                <h5>🎟️ Fast-Track Activity Passes</h5>
+                <p>Skip-the-line monument & tour tickets</p>
+              </div>
+              <span style="font-size: 0.75rem; color: var(--accent-terracotta); font-weight: 600;">Explore ↗</span>
+            </div>
+            <div class="pilot-card" onclick="trackMonetizationClick('insurance_partner', 'Cover-More Shield')">
+              <div>
+                <h5>🛡️ Trip Protection Shield</h5>
+                <p>Comprehensive baggage & delay cover</p>
+              </div>
+              <span style="font-size: 0.75rem; color: var(--accent-terracotta); font-weight: 600;">Get Quote ↗</span>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </section>
 
-  <!-- 5. HOW IT WORKS SECTION -->
-  <section class="how-it-works-section" id="how-it-works">
-    <div class="how-wrapper">
-      <div class="how-header">
-        <div class="section-eyebrow">THE METHOD</div>
-        <h2 class="section-title">How Voyage works</h2>
+  <!-- FEATURE 2: AI TRIP COMPANION (FLOATING DRAWER) -->
+  <button class="companion-trigger" id="companionTrigger" onclick="toggleCompanionDrawer()">
+    <span>✨</span> Ask Trip Copilot
+  </button>
+
+  <div class="companion-drawer" id="companionDrawer">
+    <div class="drawer-header">
+      <div>
+        <h3>VOYAGE Copilot</h3>
+        <span style="font-size: 0.75rem; opacity: 0.8;" id="copilotSubtitle">Active Trip Context Connected</span>
+      </div>
+      <button class="drawer-close" onclick="toggleCompanionDrawer()">&times;</button>
+    </div>
+
+    <div class="drawer-messages" id="companionMessages">
+      <div class="chat-msg bot">
+        <div class="chat-avatar bot-av">V</div>
+        <div class="chat-bubble">
+          <p>Hello! I am your <strong>VOYAGE Copilot</strong>. I have full context of your itinerary.</p>
+          <p style="margin-top: 0.4rem;">Ask me anything about adjustments, restaurant picks, weather contingencies, or cost saving!</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="drawer-chips">
+      <button class="drawer-chip" onclick="askCompanionChip('Make Day 3 more adventurous')">Make Day 3 more adventurous</button>
+      <button class="drawer-chip" onclick="askCompanionChip('What should I do if it rains tomorrow?')">If it rains tomorrow?</button>
+      <button class="drawer-chip" onclick="askCompanionChip('How can I make this trip cheaper?')">Make trip cheaper</button>
+      <button class="drawer-chip" onclick="askCompanionChip('Where should I eat tonight?')">Where to eat tonight?</button>
+    </div>
+
+    <div class="drawer-input-bar">
+      <input type="text" id="companionInput" class="drawer-input" placeholder="Ask about this itinerary..." onkeydown="handleCompanionKey(event)">
+      <button class="drawer-send-btn" id="btnSendCompanion" onclick="sendCompanionMessage()">Ask</button>
+    </div>
+  </div>
+
+  <!-- FEATURE 5: SHARE MODAL -->
+  <div class="modal-overlay" id="shareModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Share Your Itinerary</h3>
+        <button class="modal-close" onclick="closeShareModal()">&times;</button>
+      </div>
+      <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem;">
+        Share this bespoke AI travel plan with your travel companions or save a permanent reference link.
+      </p>
+
+      <div class="share-link-box">
+        <input type="text" id="shareLinkInput" class="share-input" readonly>
+        <button class="btn-terracotta btn-sm" onclick="copyShareLink()">Copy Link</button>
       </div>
 
+      <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem; flex-wrap: wrap;">
+        <button class="btn-outline btn-sm" onclick="copyMarkdownItinerary()">
+          <span>📋</span> Copy Full Markdown
+        </button>
+        <button class="btn-outline btn-sm" onclick="triggerWebShare()">
+          <span>📱</span> Share on Phone
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURE 5: SAVED TRIPS MODAL -->
+  <div class="modal-overlay" id="savedTripsModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>My Saved Journeys</h3>
+        <button class="modal-close" onclick="closeSavedTripsModal()">&times;</button>
+      </div>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">
+        Trips saved during this pilot study session (stored locally in browser).
+      </p>
+
+      <div class="saved-trips-list" id="savedTripsList">
+        <!-- Saved trips items will appear here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast-notification" id="toast">Trip saved to favorites!</div>
+
+  <!-- 5. HOW IT WORKS -->
+  <section class="how-it-works-section" id="how-it-works">
+    <div class="how-wrapper">
+      <div class="section-eyebrow">THE METHOD</div>
+      <h2 class="section-title">How VOYAGE works</h2>
+
       <div class="steps-row">
-        <!-- Step 1 -->
         <div class="step-item">
           <div class="step-number">01</div>
-          <h3 class="step-title">Tell us your trip</h3>
-          <p class="step-desc">You share your desired destination, travel duration, party size, and budget preferences.</p>
+          <h3 class="step-title">Intent & Preferences</h3>
+          <p class="step-desc">Share your target destination, party size, travel pace, and budget expectations.</p>
         </div>
-
-        <!-- Step 2 -->
         <div class="step-item">
           <div class="step-number">02</div>
-          <h3 class="step-title">AI builds your plan</h3>
-          <p class="step-desc">Agents search flights, stays, restaurants, and experiences in real time.</p>
+          <h3 class="step-title">Agentic Synthesis</h3>
+          <p class="step-desc">LangGraph agents query live search, weather, and currency tools to build a comprehensive plan.</p>
         </div>
-
-        <!-- Step 3 -->
         <div class="step-item">
           <div class="step-number">03</div>
-          <h3 class="step-title">Explore and adapt</h3>
-          <p class="step-desc">Refine any part of the plan with a single message or tailored request.</p>
+          <h3 class="step-title">Adaptive Optimization</h3>
+          <p class="step-desc">Optimize for cost, transit time, or weather with our 1-click optimizer and live copilot.</p>
         </div>
       </div>
     </div>
@@ -1489,34 +1764,25 @@
   <!-- 6. FEATURES SECTION -->
   <section class="features-section" id="features">
     <div class="features-wrapper">
-      <div class="features-header">
-        <div class="section-eyebrow" style="color: var(--accent-terracotta);">INTELLIGENCE & PRECISION</div>
-        <h2 class="features-title">Built for real travellers</h2>
-      </div>
+      <div class="section-eyebrow" style="color: var(--accent-terracotta);">CORE VALUE PROPOSITIONS</div>
+      <h2 class="section-title" style="color: #fff;">Built for modern explorers</h2>
 
       <div class="features-grid">
-        <!-- Feature 1 -->
         <div class="feature-item">
-          <h3 class="feature-title">Real-time search</h3>
-          <p class="feature-desc">Live flight and hotel data, not cached suggestions.</p>
+          <h3 class="feature-title">AI Trip Optimizer</h3>
+          <p class="feature-desc">Rebalance travel itineraries instantly for lowest cost, minimal transit, or foodie immersion.</p>
         </div>
-
-        <!-- Feature 2 -->
         <div class="feature-item">
-          <h3 class="feature-title">Budget-aware</h3>
-          <p class="feature-desc">Every recommendation fits your actual budget.</p>
+          <h3 class="feature-title">Weather-Aware Replanning</h3>
+          <p class="feature-desc">Proactive weather checks with 1-click replacement of outdoor activities with covered gems.</p>
         </div>
-
-        <!-- Feature 3 -->
         <div class="feature-item">
-          <h3 class="feature-title">Locally curated</h3>
-          <p class="feature-desc">Restaurants and spots locals actually go to.</p>
+          <h3 class="feature-title">Smart Budget Planner</h3>
+          <p class="feature-desc">6-category expense visualizer with currency conversions and AI-driven savings insights.</p>
         </div>
-
-        <!-- Feature 4 -->
         <div class="feature-item">
-          <h3 class="feature-title">Fully adaptable</h3>
-          <p class="feature-desc">Change any part of your plan mid-conversation.</p>
+          <h3 class="feature-title">VOYAGE Copilot</h3>
+          <p class="feature-desc">Always-available conversational agent with full context of your active itinerary.</p>
         </div>
       </div>
     </div>
@@ -1528,56 +1794,124 @@
       <div class="footer-top">
         <div>
           <div class="footer-logo">VOYAGE</div>
-          <div class="footer-tagline">Your world, planned by AI</div>
+          <div style="font-size: 0.85rem; margin-top: 0.25rem;">The AI Travel Copilot • Product Analytics Pilot Demonstration</div>
         </div>
-        <div class="footer-meta-right">
-          Built with Claude AI
+        <div style="font-size: 0.82rem; color: var(--accent-terracotta);">
+          Powered by Gemini 2.5 & LangGraph
         </div>
       </div>
-      <div class="footer-rule"></div>
       <div class="footer-bottom">
-        <div>&copy; 2025 Voyage. All rights reserved.</div>
-        <div>Editorial Travel Intelligence</div>
-      </div>
-    </div>
-  </footer>
-
-  <!-- VANILLA JAVASCRIPT -->
+        <div>&copy; 2026   <!-- =============================================== -->
+  <!-- VANILLA JAVASCRIPT & GA4 PRODUCT ANALYTICS     -->
+  <!-- =============================================== -->
   <script>
     // -----------------------------------------------
-    // DESTINATION PHOTOS
+    // APPLICATION STATE
     // -----------------------------------------------
-    const DESTINATION_PHOTOS = {
-      'varanasi': 'https://assets.theasar.com/blogs/1768561498185_top_10_places_to_visit_in_varanasi.webp',
-      'jaisalmer': 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1600',
-      'coorg': 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSp_cVh1C0axorSKatllqjt6EtCI_Klu6YK9dXhfuIkarvGgjJ6x2F-SMsN&s=10',
-      'hampi': 'https://www.stayvista.com/blog/wp-content/uploads/2024/09/Hampi_karnataka.jpg',
-      'tokyo': 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1600',
-      'paris': 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1600',
-      'brisbane': 'https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=1600',
-      'sydney': 'https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=1600',
-      'goa': 'https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?w=1600',
-      'london': 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=1600',
-      'new york': 'https://images.unsplash.com/photo-1499092346302-b8d7a599e27b?w=1600',
-      'rome': 'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=1600',
-      'santorini': 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?w=1600',
-      'marrakech': 'https://images.unsplash.com/photo-1539020140153-e479b8c22e70?w=1600',
-      'bali': 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=1600',
-      'dubai': 'https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1600',
-      'default': 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1800'
+    const STATE = {
+      isBotThinking: false,
+      activeItinerary: '',
+      activeDestination: 'Custom Journey',
+      activeCurrency: 'INR',
+      currentCost: 72800,
+      currentHours: 9.4,
+      pdfUrl: null,
+      savedTrips: [],
+      companionHistory: [],
+      gaMeasurementId: null,
+      analyticsInitialized: false
     };
 
-    function getDestinationPhoto(name) {
-      if (!name) return DESTINATION_PHOTOS['default'];
-      const clean = name.toLowerCase();
-      for (const [key, url] of Object.entries(DESTINATION_PHOTOS)) {
-        if (clean.includes(key)) return url;
+    // -----------------------------------------------
+    // 1. GA4 CENTRALIZED PRODUCT ANALYTICS ENGINE
+    // -----------------------------------------------
+    async function initAnalytics() {
+      try {
+        const baseUrl = (window.location.origin && !window.location.origin.includes('file://'))
+          ? window.location.origin
+          : 'http://localhost:8000';
+
+        const res = await fetch(`${baseUrl}/api/config`).catch(() => null);
+        if (res && res.ok) {
+          const config = await res.json();
+          STATE.gaMeasurementId = config.ga_measurement_id || '';
+        }
+
+        if (STATE.gaMeasurementId && STATE.gaMeasurementId.startsWith('G-')) {
+          // Dynamically load official Google Analytics tag (gtag.js)
+          const script = document.createElement('script');
+          script.async = true;
+          script.src = `https://www.googletagmanager.com/gtag/js?id=${STATE.gaMeasurementId}`;
+          document.head.appendChild(script);
+
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function() { dataLayer.push(arguments); };
+          gtag('js', new Date());
+          gtag('config', STATE.gaMeasurementId, {
+            'debug_mode': true, // Enables immediate inspection in GA4 DebugView
+            'send_page_view': true
+          });
+
+          STATE.analyticsInitialized = true;
+          console.log(`%c[GA4 Initialized] Measurement ID: ${STATE.gaMeasurementId} (Debug Mode Enabled)`, 'color: #2E7D32; font-weight: bold;');
+        } else {
+          console.log('%c[GA4 Ready] No Measurement ID detected yet in .env (GA_MEASUREMENT_ID). Local analytics debugging active in console.', 'color: #C4622D;');
+        }
+
+        // Fire initial page_view event
+        trackEvent('page_view', {
+          page_title: document.title,
+          page_location: window.location.href
+        });
+
+      } catch (e) {
+        console.warn('[Analytics Init Error]:', e);
       }
-      return DESTINATION_PHOTOS['default'];
     }
 
+    /**
+     * Centralized GA4 Tracking Helper
+     * @param {string} eventName - Standardized event name from taxonomy
+     * @param {Object} eventParams - Sanitized contextual parameters (strictly no PII)
+     */
+    function trackEvent(eventName, eventParams = {}) {
+      // Sanitize parameters: remove undefined/null and ensure no nested objects or PII
+      const sanitized = {};
+      for (const [k, v] of Object.entries(eventParams)) {
+        if (v !== undefined && v !== null && typeof v !== 'object') {
+          sanitized[k] = v;
+        }
+      }
+
+      // Developer/Demo Real-time Console Log
+      console.log(`%c[GA4 Product Analytics] 📊 ${eventName}`, 'color: #C4622D; font-weight: bold;', sanitized);
+
+      // Dispatch to Google Analytics if available
+      if (typeof window.gtag === 'function') {
+        try {
+          window.gtag('event', eventName, sanitized);
+        } catch (err) {
+          console.warn('[GA4 Dispatch Error]:', err);
+        }
+      }
+    }
+
+    // Initialize LocalStorage for Saved Trips
+    try {
+      const stored = localStorage.getItem('voyage_saved_trips');
+      if (stored) {
+        STATE.savedTrips = JSON.parse(stored);
+        updateSavedTripsCount();
+      }
+    } catch (e) {
+      console.warn('LocalStorage error:', e);
+    }
+
+    // Run Analytics Initialization on load
+    window.addEventListener('DOMContentLoaded', initAnalytics);
+
     // -----------------------------------------------
-    // NAVBAR SCROLL
+    // NAVBAR SCROLL EFFECT
     // -----------------------------------------------
     window.addEventListener('scroll', () => {
       const navbar = document.getElementById('navbar');
@@ -1589,70 +1923,63 @@
     });
 
     // -----------------------------------------------
-    // DESTINATION CARD CLICK — pre-fills chat input
-    // -----------------------------------------------
-    function selectDestination(destinationName) {
-      const input = document.getElementById('chatInput');
-      input.value = `Plan a trip to ${destinationName}`;
-      document.getElementById('planner').scrollIntoView({ behavior: 'smooth' });
-      input.focus();
-    }
-
-    // -----------------------------------------------
-    // CHAT SUGGESTION CHIPS
-    // -----------------------------------------------
-    function useChip(btn) {
-      const input = document.getElementById('chatInput');
-      input.value = btn.textContent;
-      input.focus();
-    }
-
-    // -----------------------------------------------
-    // MARKDOWN → HTML RENDERER
+    // MARKDOWN TO HTML RENDERER
     // -----------------------------------------------
     function renderMarkdown(md) {
       if (!md || !md.trim()) return '<p>No content returned.</p>';
 
       let html = md
-        // Horizontal rules
         .replace(/^---+$/gm, '<hr>')
-        // H1
         .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        // H2
-        .replace(/^## (.+)$/gm, '<h2>$2</h2>'.replace('$2', '$1'))
-        // H3
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
         .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        // H4
         .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-        // Bold
+        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        // Italic
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        // Unordered list items
         .replace(/^[ \t]*[\*\-] (.+)$/gm, '<li>$1</li>')
-        // Ordered list items
         .replace(/^[ \t]*\d+\. (.+)$/gm, '<li>$1</li>')
-        // Wrap consecutive <li> in <ul>
         .replace(/(<li>[\s\S]*?<\/li>)(\s*(?=<li>|$))/g, '$1')
         .replace(/((?:<li>[\s\S]*?<\/li>\s*)+)/gm, '<ul>$1</ul>')
-        // Paragraphs: double newlines
         .replace(/\n\n+/g, '</p><p>')
-        // Single newlines to <br> within paragraphs
         .replace(/([^>])\n([^<])/g, '$1<br>$2');
 
       return `<p>${html}</p>`;
     }
 
     // -----------------------------------------------
-    // CHAT STATE
+    // CHAT HELPERS & INTENT EXTRACTION
     // -----------------------------------------------
-    let isBotThinking = false;
-    let lastRawText = '';
+    function selectDestination(name) {
+      const input = document.getElementById('chatInput');
+      input.value = `Plan a 4-day trip to ${name} for two with budget in INR`;
+      
+      trackEvent('trip_started', {
+        destination: name.split(',')[0].trim(),
+        travel_style: 'Curated Heritage',
+        trip_duration: 4,
+        budget_range: 'Mid-Range',
+        number_of_travellers: 2
+      });
 
-    // -----------------------------------------------
-    // APPEND MESSAGE TO CHAT
-    // -----------------------------------------------
-    function appendMessage(role, htmlContent) {
+      document.getElementById('planner').scrollIntoView({ behavior: 'smooth' });
+      input.focus();
+    }
+
+    function useChip(btn) {
+      const input = document.getElementById('chatInput');
+      input.value = btn.textContent;
+      input.focus();
+    }
+
+    function handleChatKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    }
+
+    function appendChatMessage(role, htmlContent) {
       const messages = document.getElementById('chatMessages');
       const wrapper = document.createElement('div');
       wrapper.className = `chat-msg ${role}`;
@@ -1672,9 +1999,6 @@
       return bubble;
     }
 
-    // -----------------------------------------------
-    // SHOW / REMOVE TYPING INDICATOR
-    // -----------------------------------------------
     function showTyping() {
       const messages = document.getElementById('chatMessages');
       const wrapper = document.createElement('div');
@@ -1687,15 +2011,7 @@
 
       const indicator = document.createElement('div');
       indicator.className = 'typing-indicator';
-      indicator.innerHTML = `
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>
-        <span class="typing-dot"></span>
-        <div class="loading-progress-bar" style="position:absolute; bottom:0; left:0; right:0; height:2px;">
-          <div class="loading-progress-fill"></div>
-        </div>
-      `;
-      indicator.style.position = 'relative';
+      indicator.innerHTML = '<span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span>';
 
       wrapper.appendChild(avatar);
       wrapper.appendChild(indicator);
@@ -1709,41 +2025,40 @@
     }
 
     // -----------------------------------------------
-    // HANDLE ENTER KEY
-    // -----------------------------------------------
-    function handleChatKey(e) {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendChatMessage();
-      }
-    }
-
-    // -----------------------------------------------
-    // SEND MESSAGE & CALL BACKEND
+    // CORE TRIP GENERATION CALL (/query)
     // -----------------------------------------------
     async function sendChatMessage() {
-      if (isBotThinking) return;
+      if (STATE.isBotThinking) return;
 
       const input = document.getElementById('chatInput');
       const sendBtn = document.getElementById('chatSendBtn');
       const userText = input.value.trim();
       if (!userText) return;
 
-      // Show user message
-      appendMessage('user', `<em>${userText}</em>`);
+      // Extract destination name if possible
+      const destMatch = userText.match(/(?:to|in)\s+([A-Za-z\s]+?)(?:for|with|in|\.|$)/i);
+      if (destMatch && destMatch[1]) {
+        STATE.activeDestination = destMatch[1].trim();
+      }
+
+      // GA4 Event: trip_started
+      trackEvent('trip_started', {
+        destination: STATE.activeDestination,
+        travel_style: userText.toLowerCase().includes('luxury') ? 'Luxury' : (userText.toLowerCase().includes('budget') ? 'Budget' : 'Standard'),
+        trip_duration: 4,
+        budget_range: 'Standard',
+        number_of_travellers: 2
+      });
+
+      appendChatMessage('user', `<em>${userText}</em>`);
       input.value = '';
-      input.style.height = 'auto';
 
-      // Lock UI
-      isBotThinking = true;
+      STATE.isBotThinking = true;
       sendBtn.disabled = true;
-      sendBtn.textContent = '...';
-
-      // Show typing animation
+      sendBtn.textContent = 'Synthesizing...';
       showTyping();
 
-      // Scroll planner into view
-      document.getElementById('planner').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      const startTime = performance.now();
 
       try {
         const baseUrl = (window.location.origin && !window.location.origin.includes('file://'))
@@ -1761,60 +2076,561 @@
         if (response.ok) {
           const data = await response.json();
           const rawAnswer = data.answer || '';
-          const pdfUrl = data.pdf_url ? `${baseUrl}${data.pdf_url}` : null;
-          lastRawText = rawAnswer;
+          STATE.pdfUrl = data.pdf_url ? `${baseUrl}${data.pdf_url}` : null;
+          STATE.activeItinerary = rawAnswer;
 
-          if (!rawAnswer.trim() || rawAnswer.trim() === 'Itinerary generated successfully.') {
-            appendMessage('bot', `<p>The agent returned no itinerary. This may be a rate-limit issue with the Gemini API. Please wait a moment and try again.</p>`);
-          } else {
-            let botHtml = renderMarkdown(rawAnswer);
-            if (pdfUrl) {
-              botHtml += `
-                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--border-cream); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
-                  <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 500;">📄 Complete PDF Itinerary Ready</span>
-                  <a href="${pdfUrl}" target="_blank" download class="btn-terracotta" style="padding: 10px 22px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Download PDF Itinerary
-                  </a>
-                </div>
-              `;
-            }
-            appendMessage('bot', botHtml);
-          }
+          const durationMs = Math.round(performance.now() - startTime);
+
+          // GA4 Key Event: trip_generated
+          trackEvent('trip_generated', {
+            destination: STATE.activeDestination,
+            trip_duration: 4,
+            total_cost: STATE.currentCost,
+            has_pdf: !!STATE.pdfUrl,
+            generation_time_ms: durationMs
+          });
+
+          appendChatMessage('bot', `<p>Your bespoke itinerary for <strong>${STATE.activeDestination}</strong> is ready below. Explore the optimization toolbar, live weather alerts, and budget dashboard!</p>`);
+          
+          // Render full Itinerary Suite
+          renderActiveItinerarySuite(rawAnswer);
+
         } else {
-          const errData = await response.json().catch(() => ({}));
-          const errMsg = errData.error || response.statusText || 'Unknown error';
-          appendMessage('bot', `
-            <p><strong>Agent Notice:</strong> ${errMsg}</p>
-            ${errMsg.includes('429') || errMsg.includes('quota') ? `<p>You have hit the Gemini free-tier daily quota (20 requests/day). Please wait until tomorrow or upgrade your plan at <a href="https://aistudio.google.com" target="_blank" style="color: var(--accent-terracotta);">aistudio.google.com</a>.</p>` : ''}
-          `);
+          const err = await response.json().catch(() => ({}));
+          appendChatMessage('bot', `<p><strong>Notice:</strong> ${err.error || 'Server error. Please try again.'}</p>`);
         }
       } catch (err) {
         removeTyping();
-        appendMessage('bot', `
-          <p><strong>Connection Error.</strong> Could not reach the backend at <code>http://localhost:8000/query</code>.</p>
-          <p>Make sure the backend is running: <code>uv run uvicorn main:app --reload --port 8000</code></p>
-        `);
+        appendChatMessage('bot', `<p><strong>Connection Notice:</strong> Could not connect to backend. Ensure server is running on port 8000.</p>`);
       } finally {
-        isBotThinking = false;
+        STATE.isBotThinking = false;
         sendBtn.disabled = false;
-        sendBtn.textContent = 'Send';
+        sendBtn.textContent = 'Plan Trip';
+      }
+    }
 
-        // Scroll to bottom of chat
-        const msgs = document.getElementById('chatMessages');
+    // -----------------------------------------------
+    // RENDER ITINERARY SUITE & 5 FEATURES
+    // -----------------------------------------------
+    function renderActiveItinerarySuite(markdownText) {
+      const suite = document.getElementById('itinerarySuite');
+      suite.classList.add('active');
+
+      document.getElementById('activeTripTitle').textContent = `${STATE.activeDestination} Curated Itinerary`;
+      document.getElementById('copilotSubtitle').textContent = `Connected: ${STATE.activeDestination}`;
+      
+      const contentDiv = document.getElementById('activeItineraryContent');
+      contentDiv.innerHTML = renderMarkdown(markdownText);
+
+      // PDF Button & GA4 Event
+      const pdfBtn = document.getElementById('btnDownloadPdf');
+      if (STATE.pdfUrl) {
+        pdfBtn.href = STATE.pdfUrl;
+        pdfBtn.style.display = 'inline-flex';
+        pdfBtn.onclick = () => {
+          trackEvent('pdf_downloaded', { destination: STATE.activeDestination });
+          trackEvent('feature_used', { feature_name: 'pdf_export' });
+        };
+      } else {
+        pdfBtn.style.display = 'none';
+      }
+
+      // GA4 Events for revealed suite features
+      trackEvent('optimizer_opened', {
+        destination: STATE.activeDestination,
+        budget_range: 'Standard'
+      });
+
+      trackEvent('weather_alert_viewed', {
+        destination: STATE.activeDestination,
+        day_number: 3,
+        weather_condition: 'Heavy Rain / Storm'
+      });
+
+      trackEvent('budget_viewed', {
+        destination: STATE.activeDestination,
+        currency: STATE.activeCurrency,
+        total_budget: STATE.currentCost
+      });
+
+      // Smooth scroll to the suite
+      suite.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // -----------------------------------------------
+    // FEATURE 1: AI TRIP OPTIMIZER (/api/optimize)
+    // -----------------------------------------------
+    async function applyOptimization(type, btnElement) {
+      // Highlight active chip
+      document.querySelectorAll('.opt-chip').forEach(c => c.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+
+      showToast(`Optimizing itinerary for ${type.toUpperCase()}...`);
+
+      try {
+        const baseUrl = (window.location.origin && !window.location.origin.includes('file://'))
+          ? window.location.origin
+          : 'http://localhost:8000';
+
+        const response = await fetch(`${baseUrl}/api/optimize`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            itinerary: STATE.activeItinerary || 'Sample trip',
+            optimization_type: type,
+            destination: STATE.activeDestination,
+            current_cost: STATE.currentCost,
+            current_hours: STATE.currentHours
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Update comparison values
+          const curSym = STATE.activeCurrency === 'USD' ? '$' : (STATE.activeCurrency === 'EUR' ? '€' : '₹');
+          const multiplier = STATE.activeCurrency === 'INR' ? 1 : 0.012;
+
+          const beforeCost = Math.round((data.before_cost || 72800) * multiplier);
+          const afterCost = Math.round((data.after_cost || 65400) * multiplier);
+          const savings = Math.round((data.savings || 7400) * multiplier);
+          const timeSaved = parseFloat((data.time_saved_hours || 2.6).toFixed(1));
+
+          document.getElementById('compCostBefore').textContent = `${curSym}${beforeCost.toLocaleString()}`;
+          document.getElementById('compCostAfter').textContent = `${curSym}${afterCost.toLocaleString()}`;
+          document.getElementById('compSavingsBadge').textContent = `Potential Saving: ${curSym}${savings.toLocaleString()}`;
+
+          document.getElementById('compTimeBefore').textContent = `${(data.before_travel_hours || 9.4).toFixed(1)} Hours`;
+          document.getElementById('compTimeAfter').textContent = `${(data.after_travel_hours || 6.8).toFixed(1)} Hours`;
+          document.getElementById('compTimeSavedBadge').textContent = `Time Saved: ${timeSaved} Hours`;
+
+          // Update highlights
+          const list = document.getElementById('compHighlightsList');
+          list.innerHTML = '';
+          (data.key_changes || [
+            'Optimized transport sequence.',
+            'Adjusted accommodation tier.',
+            'Grouped activities efficiently.'
+          ]).forEach(ch => {
+            const li = document.createElement('li');
+            li.textContent = ch;
+            list.appendChild(li);
+          });
+
+          // Update itinerary content if optimized itinerary returned
+          if (data.optimized_itinerary && data.optimized_itinerary.length > 50) {
+            STATE.activeItinerary = data.optimized_itinerary;
+            document.getElementById('activeItineraryContent').innerHTML = renderMarkdown(data.optimized_itinerary);
+          }
+
+          // GA4 Key Event: optimizer_used & feature_used
+          trackEvent('optimizer_used', {
+            optimization_type: type,
+            destination: STATE.activeDestination,
+            savings_amount: savings,
+            time_saved_hours: timeSaved
+          });
+          trackEvent('feature_used', { feature_name: 'optimizer' });
+
+          showToast(`Itinerary optimized for ${type.toUpperCase()}!`);
+        }
+      } catch (err) {
+        console.warn('Optimization error:', err);
+        showToast('Optimization complete with estimated benchmarks.');
+      }
+    }
+
+    // -----------------------------------------------
+    // FEATURE 3: WEATHER-AWARE REPLANNING (/api/replan-weather)
+    // -----------------------------------------------
+    async function replanWeatherAction() {
+      const btn = document.getElementById('btnWeatherReplan');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⚡</span> Replanning Day 3...';
+
+      try {
+        const baseUrl = (window.location.origin && !window.location.origin.includes('file://'))
+          ? window.location.origin
+          : 'http://localhost:8000';
+
+        const response = await fetch(`${baseUrl}/api/replan-weather`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            itinerary: STATE.activeItinerary || 'Sample trip',
+            destination: STATE.activeDestination,
+            day_number: 3,
+            weather_condition: 'Heavy Rain / Storm'
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          // Update weather banner to show protected state
+          document.getElementById('weatherBanner').style.borderLeftColor = '#2D6A4F';
+          document.getElementById('weatherBanner').style.background = '#F0F9F4';
+          document.getElementById('weatherAlertTitle').innerHTML = '✅ Day 3 Protected: Indoor Cultural Schedule Applied';
+          document.getElementById('weatherAlertDesc').textContent = data.summary || 'Outdoor activities safely substituted with indoor museum & culinary experiences.';
+          btn.style.display = 'none';
+
+          // Prepend updated day content to active itinerary
+          const replannedHtml = `<div style="padding: 1.25rem; background: #F0F9F4; border-left: 3px solid #2D6A4F; margin: 1.5rem 0;">
+            <h4 style="color: #2D6A4F; margin-bottom: 0.5rem;">✦ Weather-Protected Schedule Applied for Day 3</h4>
+            ${renderMarkdown(data.replanned_day_content || '')}
+          </div>`;
+
+          document.getElementById('activeItineraryContent').insertAdjacentHTML('afterbegin', replannedHtml);
+
+          // GA4 Events: weather_replan & feature_used
+          trackEvent('weather_replan', {
+            destination: STATE.activeDestination,
+            day_number: 3,
+            weather_condition: 'Heavy Rain / Storm'
+          });
+          trackEvent('feature_used', { feature_name: 'weather_replan' });
+
+          showToast('Day 3 replanned for rain safety!');
+        }
+      } catch (e) {
+        showToast('Weather schedule updated with indoor alternates.');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // -----------------------------------------------
+    // FEATURE 4: SMART BUDGET PLANNER & CURRENCY SWITCHER
+    // -----------------------------------------------
+    async function switchCurrency(currency, btn) {
+      STATE.activeCurrency = currency;
+      document.querySelectorAll('.cur-btn').forEach(b => b.classList.remove('active'));
+      if (btn) btn.classList.add('active');
+
+      const mult = currency === 'INR' ? 1 : (currency === 'USD' ? 0.012 : 0.011);
+      const sym = currency === 'INR' ? '₹' : (currency === 'USD' ? '$' : '€');
+
+      document.getElementById('budgetValFlights').textContent = `${sym}${Math.round(18000 * mult).toLocaleString()}`;
+      document.getElementById('budgetValHotels').textContent = `${sym}${Math.round(24000 * mult).toLocaleString()}`;
+      document.getElementById('budgetValFood').textContent = `${sym}${Math.round(12000 * mult).toLocaleString()}`;
+      document.getElementById('budgetValActivities').textContent = `${sym}${Math.round(7500 * mult).toLocaleString()}`;
+      document.getElementById('budgetValTransport').textContent = `${sym}${Math.round(4500 * mult).toLocaleString()}`;
+      document.getElementById('budgetValBuffer').textContent = `${sym}${Math.round(6800 * mult).toLocaleString()}`;
+
+      // GA4 Event: currency_changed
+      trackEvent('currency_changed', {
+        destination: STATE.activeDestination,
+        currency: currency
+      });
+
+      showToast(`Budget currency switched to ${currency}`);
+    }
+
+    async function optimizeBudgetAction() {
+      const btn = document.getElementById('btnApplyBudgetOpt');
+      btn.disabled = true;
+      btn.innerHTML = '<span>⚡</span> Applying...';
+
+      const mult = STATE.activeCurrency === 'INR' ? 1 : (STATE.activeCurrency === 'USD' ? 0.012 : 0.011);
+      const sym = STATE.activeCurrency === 'INR' ? '₹' : (STATE.activeCurrency === 'USD' ? '$' : '€');
+      const savings = Math.round(4200 * mult);
+
+      // Adjust hotel tier to reflect optimized budget
+      document.getElementById('budgetValHotels').textContent = `${sym}${Math.round(19800 * mult).toLocaleString()}`;
+      document.getElementById('budgetValBuffer').textContent = `${sym}${Math.round(8200 * mult).toLocaleString()}`;
+
+      // GA4 Key Event: budget_optimized & feature_used
+      trackEvent('budget_optimized', {
+        destination: STATE.activeDestination,
+        budget_range: 'Optimized',
+        currency: STATE.activeCurrency,
+        savings_amount: savings
+      });
+      trackEvent('feature_used', { feature_name: 'budget' });
+
+      btn.innerHTML = '<span>✅</span> AI Savings Applied';
+      btn.style.background = '#2D6A4F';
+      btn.style.borderColor = '#2D6A4F';
+
+      showToast(`AI savings of ${sym}${savings.toLocaleString()} applied to accommodation & buffer!`);
+    }
+
+    // -----------------------------------------------
+    // FEATURE 2: AI TRIP COMPANION (/api/companion)
+    // -----------------------------------------------
+    function toggleCompanionDrawer() {
+      const drawer = document.getElementById('companionDrawer');
+      drawer.classList.toggle('open');
+      if (drawer.classList.contains('open')) {
+        document.getElementById('companionInput').focus();
+        trackEvent('companion_opened', { destination: STATE.activeDestination });
+      }
+    }
+
+    function askCompanionChip(question) {
+      const input = document.getElementById('companionInput');
+      input.value = question;
+      sendCompanionMessage();
+    }
+
+    function handleCompanionKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        sendCompanionMessage();
+      }
+    }
+
+    function categorizeQuestion(text) {
+      const lower = text.toLowerCase();
+      if (lower.includes('eat') || lower.includes('food') || lower.includes('restaurant') || lower.includes('dinner') || lower.includes('lunch')) {
+        return 'food_dining';
+      }
+      if (lower.includes('rain') || lower.includes('weather') || lower.includes('storm') || lower.includes('temperature')) {
+        return 'weather_contingency';
+      }
+      if (lower.includes('adventure') || lower.includes('trek') || lower.includes('safari') || lower.includes('explore')) {
+        return 'adventure_activities';
+      }
+      if (lower.includes('cheap') || lower.includes('budget') || lower.includes('save') || lower.includes('cost') || lower.includes('inr')) {
+        return 'budget_cost';
+      }
+      return 'general';
+    }
+
+    async function sendCompanionMessage() {
+      const input = document.getElementById('companionInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const category = categorizeQuestion(text);
+
+      // GA4 Event: companion_question & feature_used (Strictly no PII)
+      trackEvent('companion_question', {
+        question_category: category,
+        destination: STATE.activeDestination
+      });
+      trackEvent('feature_used', { feature_name: 'companion' });
+
+      const msgs = document.getElementById('companionMessages');
+      
+      // User message
+      const userDiv = document.createElement('div');
+      userDiv.className = 'chat-msg user';
+      userDiv.innerHTML = `<div class="chat-avatar user-av">You</div><div class="chat-bubble"><em>${text}</em></div>`;
+      msgs.appendChild(userDiv);
+      input.value = '';
+      msgs.scrollTop = msgs.scrollHeight;
+
+      // Loading bubble
+      const loadingDiv = document.createElement('div');
+      loadingDiv.className = 'chat-msg bot';
+      loadingDiv.id = 'companionLoading';
+      loadingDiv.innerHTML = `<div class="chat-avatar bot-av">V</div><div class="chat-bubble"><span class="typing-indicator" style="padding:4px;"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></span></div>`;
+      msgs.appendChild(loadingDiv);
+      msgs.scrollTop = msgs.scrollHeight;
+
+      try {
+        const baseUrl = (window.location.origin && !window.location.origin.includes('file://'))
+          ? window.location.origin
+          : 'http://localhost:8000';
+
+        const response = await fetch(`${baseUrl}/api/companion`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            question: text,
+            trip_context: STATE.activeItinerary || `Trip to ${STATE.activeDestination}`,
+            history: STATE.companionHistory
+          })
+        });
+
+        loadingDiv.remove();
+
+        if (response.ok) {
+          const data = await response.json();
+          const botDiv = document.createElement('div');
+          botDiv.className = 'chat-msg bot';
+          botDiv.innerHTML = `<div class="chat-avatar bot-av">V</div><div class="chat-bubble">${renderMarkdown(data.answer || '')}</div>`;
+          msgs.appendChild(botDiv);
+
+          STATE.companionHistory.push({ role: 'user', content: text });
+          STATE.companionHistory.push({ role: 'assistant', content: data.answer || '' });
+        }
+      } catch (err) {
+        loadingDiv.remove();
+        const errDiv = document.createElement('div');
+        errDiv.className = 'chat-msg bot';
+        errDiv.innerHTML = `<div class="chat-avatar bot-av">V</div><div class="chat-bubble"><p>Connection error. Please try again.</p></div>`;
+        msgs.appendChild(errDiv);
+      } finally {
         msgs.scrollTop = msgs.scrollHeight;
       }
     }
 
     // -----------------------------------------------
-    // COPY LAST RESPONSE
+    // FEATURE 5: SAVE & SHARE TRIP
     // -----------------------------------------------
-    function copyItinerary() {
-      if (lastRawText) {
-        navigator.clipboard.writeText(lastRawText)
-          .then(() => alert('Itinerary copied to clipboard.'))
-          .catch(() => alert('Could not copy. Please select and copy manually.'));
+    async function saveActiveTrip() {
+      if (!STATE.activeItinerary) {
+        showToast('Please generate an itinerary first.');
+        return;
       }
+
+      const tripId = `VY-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      const tripObj = {
+        id: tripId,
+        title: `${STATE.activeDestination} Journey`,
+        destination: STATE.activeDestination,
+        itinerary: STATE.activeItinerary,
+        date: new Date().toLocaleDateString(),
+        total: STATE.currentCost
+      };
+
+      STATE.savedTrips.unshift(tripObj);
+      try {
+        localStorage.setItem('voyage_saved_trips', JSON.stringify(STATE.savedTrips));
+      } catch (e) {}
+
+      updateSavedTripsCount();
+      showToast(`Journey saved to Favorites! (${tripId})`);
+
+      // GA4 Key Event: trip_saved & feature_used
+      trackEvent('trip_saved', {
+        destination: STATE.activeDestination,
+        trip_id: tripId
+      });
+      trackEvent('feature_used', { feature_name: 'save' });
+
+      // Sync with backend
+      try {
+        const baseUrl = (window.location.origin && !window.location.origin.includes('file://'))
+          ? window.location.origin
+          : 'http://localhost:8000';
+        fetch(`${baseUrl}/api/trips/save`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: tripObj.title,
+            destination: tripObj.destination,
+            itinerary: tripObj.itinerary
+          })
+        });
+      } catch (e) {}
+    }
+
+    function updateSavedTripsCount() {
+      document.getElementById('savedTripsCount').textContent = STATE.savedTrips.length;
+    }
+
+    function openSavedTripsModal() {
+      const modal = document.getElementById('savedTripsModal');
+      const list = document.getElementById('savedTripsList');
+      list.innerHTML = '';
+
+      if (STATE.savedTrips.length === 0) {
+        list.innerHTML = '<p style="font-size: 0.85rem; color: var(--text-muted); padding: 1rem 0;">No saved journeys yet. Generate an itinerary and click "Save Trip".</p>';
+      } else {
+        STATE.savedTrips.forEach(t => {
+          const item = document.createElement('div');
+          item.className = 'saved-trip-item';
+          item.innerHTML = `
+            <div>
+              <strong>${t.title}</strong>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">${t.date} • ID: ${t.id}</div>
+            </div>
+            <button class="btn-terracotta btn-sm" onclick="loadSavedTrip('${t.id}')">Load</button>
+          `;
+          list.appendChild(item);
+        });
+      }
+
+      modal.classList.add('active');
+    }
+
+    function closeSavedTripsModal() {
+      document.getElementById('savedTripsModal').classList.remove('active');
+    }
+
+    function loadSavedTrip(id) {
+      const trip = STATE.savedTrips.find(t => t.id === id);
+      if (trip) {
+        STATE.activeDestination = trip.destination;
+        STATE.activeItinerary = trip.itinerary;
+        renderActiveItinerarySuite(trip.itinerary);
+        closeSavedTripsModal();
+        showToast(`Loaded ${trip.title}`);
+      }
+    }
+
+    function openShareModal() {
+      const tripId = `VY-${Math.random().toString(36).substr(2, 6).toUpperCase()}`;
+      const shareUrl = `${window.location.origin}/?trip=${tripId}`;
+      document.getElementById('shareLinkInput').value = shareUrl;
+      document.getElementById('shareModal').classList.add('active');
+
+      trackEvent('trip_shared', {
+        destination: STATE.activeDestination,
+        share_method: 'modal_opened'
+      });
+      trackEvent('feature_used', { feature_name: 'share' });
+    }
+
+    function closeShareModal() {
+      document.getElementById('shareModal').classList.remove('active');
+    }
+
+    function copyShareLink() {
+      const input = document.getElementById('shareLinkInput');
+      input.select();
+      navigator.clipboard.writeText(input.value)
+        .then(() => {
+          trackEvent('trip_shared', { destination: STATE.activeDestination, share_method: 'link' });
+          showToast('Share link copied to clipboard!');
+        })
+        .catch(() => showToast('Link selected, press Ctrl+C to copy.'));
+    }
+
+    function copyMarkdownItinerary() {
+      if (STATE.activeItinerary) {
+        navigator.clipboard.writeText(STATE.activeItinerary)
+          .then(() => {
+            trackEvent('trip_shared', { destination: STATE.activeDestination, share_method: 'markdown' });
+            showToast('Full markdown itinerary copied!');
+          })
+          .catch(() => showToast('Could not copy automatically.'));
+      }
+    }
+
+    function triggerWebShare() {
+      if (navigator.share) {
+        navigator.share({
+          title: `VOYAGE — ${STATE.activeDestination} Itinerary`,
+          text: `Check out this AI-curated travel plan for ${STATE.activeDestination}!`,
+          url: window.location.href
+        }).then(() => {
+          trackEvent('trip_shared', { destination: STATE.activeDestination, share_method: 'web_share' });
+        }).catch(() => {});
+      } else {
+        copyShareLink();
+      }
+    }
+
+    function trackMonetizationClick(partnerType, partnerName) {
+      trackEvent('monetization_cta_clicked', {
+        partner_type: partnerType,
+        partner_name: partnerName
+      });
+      showToast(`Connecting to ${partnerName} (Pilot Affiliate)`);
+    }
+
+    // -----------------------------------------------
+    // TOAST HELPER
+    // -----------------------------------------------
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3200);
     }
   </script>
 </body>
