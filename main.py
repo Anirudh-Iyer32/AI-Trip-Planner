@@ -9,6 +9,7 @@ from agent.features import (
     replan_weather,
     calculate_budget_breakdown
 )
+from agent.itinerary_structurer import structure_and_validate_itinerary
 from utils.save_to_document import save_document, save_to_pdf
 import os
 import json
@@ -84,14 +85,14 @@ async def get_client_config():
 
 
 # ----------------------------------------------------
-# 1. CORE ITINERARY QUERY (PRESERVED & HARDENED)
+# 1. CORE ITINERARY QUERY (PRESERVED & STRUCTURED)
 # ----------------------------------------------------
 class QueryRequest(BaseModel):
     question: str
 
 
 @app.post("/query")
-async def query_travel_agent(query: QueryRequest):
+def query_travel_agent(query: QueryRequest):
     """Core Agent Query with primary Google Gemini and automated Groq fallback."""
     try:
         print(f"[Query Received]: {query.question}")
@@ -133,12 +134,19 @@ async def query_travel_agent(query: QueryRequest):
         else:
             final_output = str(output)
 
-        # Save markdown and PDF outputs
+        # Normalize & validate structured representation without redundant LLM call
+        structured_data = structure_and_validate_itinerary(final_output, query.question)
+
+        # Save markdown and styled ReportLab PDF outputs
         save_document(response_text=final_output)
-        pdf_filename = save_to_pdf(response_text=final_output)
+        pdf_filename = save_to_pdf(response_text=final_output, structured_data=structured_data)
         pdf_url = f"/output/{pdf_filename}" if pdf_filename else None
 
-        return {"answer": final_output, "pdf_url": pdf_url}
+        return {
+            "answer": final_output,
+            "structured_itinerary": structured_data,
+            "pdf_url": pdf_url
+        }
     except Exception as e:
         print(f"[Query Error]: {e}")
         return JSONResponse(status_code=500, content={"error": str(e)})
@@ -156,7 +164,7 @@ class OptimizeRequest(BaseModel):
 
 
 @app.post("/api/optimize")
-async def optimize_trip_endpoint(req: OptimizeRequest):
+def optimize_trip_endpoint(req: OptimizeRequest):
     try:
         result = optimize_itinerary(
             itinerary=req.itinerary,
@@ -175,16 +183,18 @@ async def optimize_trip_endpoint(req: OptimizeRequest):
 # 3. FEATURE 2: AI TRIP COMPANION
 # ----------------------------------------------------
 class CompanionRequest(BaseModel):
-    question: str
+    question: Optional[str] = None
+    message: Optional[str] = None
     trip_context: Optional[str] = ""
     history: Optional[List[Dict[str, str]]] = []
 
 
 @app.post("/api/companion")
-async def companion_chat_endpoint(req: CompanionRequest):
+def companion_chat_endpoint(req: CompanionRequest):
     try:
+        user_msg = req.question or req.message or ""
         answer = companion_chat(
-            question=req.question,
+            question=user_msg,
             trip_context=req.trip_context or "",
             history=req.history or []
         )
@@ -205,7 +215,7 @@ class WeatherReplanRequest(BaseModel):
 
 
 @app.post("/api/replan-weather")
-async def replan_weather_endpoint(req: WeatherReplanRequest):
+def replan_weather_endpoint(req: WeatherReplanRequest):
     try:
         result = replan_weather(
             itinerary=req.itinerary,
@@ -223,16 +233,16 @@ async def replan_weather_endpoint(req: WeatherReplanRequest):
 # 5. FEATURE 4: SMART BUDGET PLANNER
 # ----------------------------------------------------
 class BudgetRequest(BaseModel):
-    itinerary: str
-    currency: Optional[str] = "INR"
+    itinerary: Optional[str] = ""
     destination: Optional[str] = ""
+    currency: Optional[str] = "INR"
 
 
 @app.post("/api/budget-breakdown")
-async def budget_breakdown_endpoint(req: BudgetRequest):
+def budget_breakdown_endpoint(req: BudgetRequest):
     try:
         result = calculate_budget_breakdown(
-            itinerary=req.itinerary,
+            itinerary=req.itinerary or "",
             currency=req.currency or "INR",
             destination=req.destination or ""
         )
@@ -249,6 +259,7 @@ class SaveTripRequest(BaseModel):
     title: Optional[str] = "My AI Trip"
     destination: Optional[str] = "Curated Trip"
     itinerary: str
+    structured_itinerary: Optional[Dict[str, Any]] = None
     budget_summary: Optional[Dict[str, Any]] = None
     optimization_info: Optional[Dict[str, Any]] = None
 
@@ -265,6 +276,7 @@ async def save_trip_endpoint(req: SaveTripRequest):
             "title": req.title,
             "destination": req.destination,
             "itinerary": req.itinerary,
+            "structured_itinerary": req.structured_itinerary,
             "budget_summary": req.budget_summary,
             "optimization_info": req.optimization_info
         }
