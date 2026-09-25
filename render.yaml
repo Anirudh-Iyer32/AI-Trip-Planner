@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: ai-trip-planner
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: TAVILY_API_KEY
+        sync: false
+      - key: OPENWEATHERMAP_API_KEY
+        sync: false
+      - key: EXCHANGE_RATE_API_KEY
+        sync: false
+      - key: GA_MEASUREMENT_ID
+        value: G-SLTC2QK775

@@ -8,6 +8,15 @@
   <meta name="description"
     content="Voyage builds your bespoke travel itinerary in seconds. Handcrafted, editorial itineraries powered by real-time intelligence.">
 
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SLTC2QK775"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-SLTC2QK775');
+  </script>
+
   <!-- Google Fonts: Playfair Display & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1602,6 +1611,7 @@
     // CHAT SUGGESTION CHIPS
     // -----------------------------------------------
     function useChip(btn) {
+      trackEvent('example_prompt_clicked');
       const input = document.getElementById('chatInput');
       input.value = btn.textContent;
       input.focus();
@@ -1648,6 +1658,12 @@
     // -----------------------------------------------
     let isBotThinking = false;
     let lastRawText = '';
+
+    function trackEvent(name, params = {}) {
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', name, params);
+      }
+    }
 
     // -----------------------------------------------
     // APPEND MESSAGE TO CHAT
@@ -1772,7 +1788,7 @@
               botHtml += `
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--border-cream); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
                   <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 500;">📄 Complete PDF Itinerary Ready</span>
-                  <a href="${pdfUrl}" target="_blank" download class="btn-terracotta" style="padding: 10px 22px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+                  <a href="${pdfUrl}" target="_blank" download class="btn-terracotta" onclick="trackEvent('pdf_downloaded', { download_type: 'pdf' })" style="padding: 10px 22px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Download PDF Itinerary
                   </a>
@@ -1780,6 +1796,7 @@
               `;
             }
             appendMessage('bot', botHtml);
+            trackEvent('trip_generated');
           }
         } else {
           const errData = await response.json().catch(() => ({}));
