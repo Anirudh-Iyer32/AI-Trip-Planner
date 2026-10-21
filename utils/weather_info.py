@@ -15,7 +15,7 @@ class WeatherForecastTool:
                         "q": place,
                         "appid": self.api_key,
                          }
-                response = requests.get(url, params=params)
+                response = requests.get(url, params=params, timeout=10)
                 return response.json() if response.status_code==200 else {}
             
             except Exception as e:
@@ -32,7 +32,7 @@ class WeatherForecastTool:
                         "cnt": 10,
                         "units": "metric"
                     }
-                    response = requests.get(url, params=params)
+                    response = requests.get(url, params=params, timeout=10)
                     return response.json() if response.status_code == 200 else {}
                 except Exception as e:
-                    raise e 
+                    raise e

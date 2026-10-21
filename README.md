@@ -1,165 +1,71 @@
-# AI-Trip-Planner
+# Voyage trip planner
 
-AI-Trip-Planner is an advanced, agentic travel planning application that leverages the power of LangGraph and LangChain to orchestrate complex, tool-augmented workflows for generating detailed, real-time travel plans. Designed for AI engineers and enthusiasts, this project demonstrates modular tool integration, graph-based agent workflows, and seamless API/streamlit UI interaction.
+A small FastAPI trip planner for a product analytics class project. The main interface is served at `/`. Visitors can enter a structured trip brief or a free-text request, generate a plan, download a PDF, copy the result, and rate it. The existing LangGraph workflow can call place search, weather, cost, and currency tools. Prices and travel details are estimates; verify them before booking.
 
-## Features
+## Run locally
 
-- **Agentic Workflow**: Utilizes LangGraph to build a stateful, tool-augmented agent for travel planning.
-- **Tool Integration**: Modular tools for weather, currency, expense calculation, and place search, each encapsulated and reusable.
-- **LLM Orchestration**: Integrates LLMs (Google Gemini, Groq) via LangChain for dynamic, context-aware responses.
-- **API & UI**: FastAPI backend with a Streamlit frontend for interactive user experience.
-- **Automatic Markdown Export**: Each travel plan is saved as a well-formatted Markdown file.
+Use Python 3.11 or 3.12.
 
-## Architecture & Workflow
-
-The core of the system is a graph-based agent built with LangGraph. The agent receives user queries, orchestrates tool calls, and composes a comprehensive travel plan using LLM reasoning and real-time data.
-
-### Workflow Graph
-
-![Workflow Graph](my_graph.png)
-
-**Description:**
-- The workflow starts with user input, passes through the agent node, which can invoke any of the available tools as needed, and iterates until a complete plan is generated.
-- The graph structure enables flexible, multi-step reasoning and tool use.
-
-## Tool Interaction Diagram
-
-Below is the diagram of how the agent interacts with all tools:
-
-```
-User Query
-	|
-	v
-Agent (LangGraph)
-	|---> WeatherInfoTool (weather, forecast)
-	|---> PlaceSearchTool (attractions, restaurants, activities, transport)
-	|---> CalculatorTool (hotel cost, total cost, daily budget)
-	|---> CurrencyConverterTool (currency conversion)
-	v
-Composed Travel Plan (Markdown)
+```bash
+python -m venv .venv
+.venv/bin/pip install -r requirements.txt
+cp .env_example .env
+# Fill in either GROQ_API_KEY or GOOGLE_API_KEY in .env.
+# The tested configuration is MODEL_PROVIDER=groq and GROQ_MODEL=openai/gpt-oss-20b.
+.venv/bin/uvicorn main:app --reload --port 8000
 ```
 
-## Tooling Overview
+Open `http://localhost:8000`. `/health` is the Render health check. The legacy Streamlit client is not used by the deployment.
 
-The agent is equipped with the following modular tools, each implemented as a class and exposed to the agent via LangChain's tool interface:
+## Analytics setup
 
-### 1. WeatherInfoTool
-**File:** `tools/weather_info_tool.py`  
-**Depends on:** `utils/weather_info.py`  
-**Purpose:** Fetches current weather and multi-day forecasts for any city using the OpenWeatherMap API.
-**Exposed Functions:**
-  - `get_current_weather(city: str) -> str`: Returns current temperature and description.
-  - `get_weather_forecast(city: str) -> str`: Returns a 10-period forecast summary.
+The browser asks visitors to opt in before loading any analytics SDK. Its consent choice is stored in local storage; the footer lets them change it. No prompt text, itinerary text, or email is sent as an event property. Browser-side project IDs are served by `/analytics-config`; never put service secrets there.
 
-### 2. PlaceSearchTool
-**File:** `tools/place_search_tool.py`  
-**Depends on:** `utils/place_info_search.py`  
-**Purpose:** Finds attractions, restaurants, activities, and transportation options using DuckDuckGo Search (and Tavily API).
-**Exposed Functions:**
-  - `search_attractions(place: str) -> str`
-  - `search_restaurants(place: str) -> str`
-  - `search_activities(place: str) -> str`
-  - `search_transportations(place: str) -> str`
+Add these environment variables for the platforms you want to compare:
 
-### 3. CalculatorTool
-**File:** `tools/expense_calculator_tool.py`  
-**Depends on:** `utils/expense_calculator.py`  
-**Purpose:** Performs expense calculations for trip planning.
-**Exposed Functions:**
-  - `estimate_total_hotel_cost(price_per_night: float, total_days: float) -> float`
-  - `calculate_total_cost(*costs: float) -> float`
-  - `calculate_daily_expense_budget(total_cost: float, days: int) -> float`
+The existing GA4 measurement ID from the project is already set in `render.yaml`; replace it if your class uses a different GA4 property.
 
-### 4. CurrencyConverterTool
-**File:** `tools/currency_conversion_tool.py`  
-**Depends on:** `utils/currency_convertor.py`  
-**Purpose:** Converts amounts between currencies using the ExchangeRate API.
-**Exposed Functions:**
-  - `convert_currency(amount: float, from_currency: str, to_currency: str) -> float`
+| Platform | Variable | Where to find it |
+| --- | --- | --- |
+| Google Analytics 4 | `GA_MEASUREMENT_ID` | Web data stream measurement ID (`G-...`) |
+| Mixpanel | `MIXPANEL_TOKEN` | Project token |
+| Amplitude | `AMPLITUDE_API_KEY` | Project API key |
+| PostHog | `POSTHOG_PROJECT_TOKEN`, `POSTHOG_HOST` | Project token and ingestion host (US or EU) |
 
+All four receive the same explicit events from `analytics.js`. Automatic click, form, and session recording are disabled to avoid collecting trip text. Analytics project IDs are public browser credentials by design; LLM keys remain server-side.
 
-## Prompt Engineering
+| Event | Trigger | Useful question |
+| --- | --- | --- |
+| `page_view` | Consent granted on the planner page | How many opted-in visitors arrived? |
+| `planner_opened` | Planner enters the viewport | What share reached the planner? |
+| `destination_selected` | Destination card clicked | Which featured destination attracts interest? |
+| `example_prompt_clicked` | Example prompt clicked | Do examples help people start? |
+| `plan_started` | Valid trip request submitted | How many people try planning? |
+| `plan_generated` | Non-empty result returned | What is the generation completion rate and latency? |
+| `plan_failed` | Empty, HTTP, or network failure | Where does the funnel fail? |
+| `plan_downloaded` | PDF link clicked | Do users save their plans? |
+| `plan_copied` | Copy succeeds | Do users reuse the plan elsewhere? |
+| `plan_feedback_submitted` | Helpful / Needs work clicked | How useful do users find results? |
 
-The agent is guided by a system prompt (see `prompt_library/prompt.py`) that instructs it to provide:
-- Two travel plans (classic and off-beat)
-- Day-by-day itinerary
-- Hotel, restaurant, activity, and transportation recommendations
-- Cost breakdowns and weather details
-- All output in clean Markdown
+Suggested metrics for the class report:
 
-## Tracing & Monitoring with LangSmith
+1. **Planner reach:** unique users with `planner_opened` ÷ unique users with `page_view`.
+2. **Start rate:** unique users with `plan_started` ÷ unique users with `planner_opened`.
+3. **Completion rate:** successful `plan_generated` events ÷ (`plan_generated` + `plan_failed`) events. Use event counts here so multiple attempts are represented.
+4. **Save rate:** unique users with `plan_downloaded` or `plan_copied` ÷ unique users with `plan_generated`.
+5. **Helpful rate:** `helpful` feedback ÷ all `plan_feedback_submitted` events.
+6. **Median generation time:** median `duration_seconds` on `plan_generated`; segment by `source`, `budget_tier`, or `duration_days`.
 
-This project integrates LangSmith for tracing and monitoring all agentic workflows and tool calls. LangSmith provides detailed visibility into LLM reasoning, tool usage, and execution paths, making it easier to debug, optimize, and understand agent behavior. All interactions and tool invocations are automatically logged for analysis. 
-## Folder Structure
+Use the same date range, timezone, consent population, and definitions in GA4, Mixpanel, Amplitude, and PostHog. Build a funnel `page_view → planner_opened → plan_started → plan_generated → plan_downloaded` in each tool. Some browsers block analytics scripts, so these counts are directional rather than a census of all visitors. Do not count your own local testing: no platform keys are needed locally.
 
-The project is organized for clarity, modularity, and extensibility:
+## Deploy on Render
 
-```
-AI-Trip-Planner/
-├── agent/                  # Agent workflow logic (LangGraph integration)
-│   ├── __init__.py
-│   └── agentic_workflow.py
-├── app_streamlit.py        # Streamlit frontend app
-├── config/                 # Configuration files
-│   ├── __init__.py
-│   └── config.yaml
-├── main.py                 # FastAPI backend entrypoint
-├── my_graph.png            # Workflow graph image
-├── notebook/               # Experiments and research notebooks
-│   └── experiment.ipynb
-├── output/                 # Auto-saved Markdown travel plans
-│   ├── AI_Trip_Planner_*.md
-├── prompt_library/         # Prompt engineering and system prompt
-│   ├── __init__.py
-│   └── prompt.py
-├── requirements.txt        # Project dependencies
-├── pyproject.toml          # Python project metadata
-├── setup.py                # Setup script for packaging
-├── tools/                  # All modular agent tools
-│   ├── __init__.py
-│   ├── currency_conversion_tool.py
-│   ├── expense_calculator_tool.py
-│   ├── place_search_tool.py
-│   └── weather_info_tool.py
-├── utils/                  # Utility modules for tool logic
-│   ├── __init__.py
-│   ├── config_loader.py
-│   ├── currency_convertor.py
-│   ├── expense_calculator.py
-│   ├── model_loader.py
-│   ├── place_info_search.py
-│   ├── save_to_document.py
-│   └── weather_info.py
-├── .env_example            # Example environment variables
-├── .gitignore
-├── .python-version
-├── AI_TRAVEL_PLANNER.egg-info/
-├── uv.lock
-```
+1. Push this branch to your GitHub repository.
+2. In Render, create a Blueprint from the repository; `render.yaml` defines the Python web service and `/health` check.
+3. Set `GROQ_API_KEY` (or change `MODEL_PROVIDER` to `google` and set `GOOGLE_API_KEY`). Set other tool API keys as available.
+4. Set the four analytics variables above. Use the host shown in your PostHog project settings if it is not the US host.
+5. After deployment, visit `/health`, generate one plan, verify PDF download, then confirm each configured provider receives `page_view`, `plan_started`, and `plan_generated` in its live event debugger.
 
-## How to Run
+Render's free filesystem is ephemeral, so generated PDFs can disappear after a restart or redeploy. For the class study, ask users to download them immediately. Durable saved plans would require object storage.
 
-1. **Install dependencies:**
-	```sh
-	uv pip install requirements.txt
-	# or add individually:
-	uv add <package-name>
-	```
-2. **Set up environment variables:**
-	- Copy `.env_example` to `.env` and fill in your API keys.
-3. **Start the backend:**
-	```sh
-	uvicorn main:app --reload --port 8000
-	```
-4. **Start the frontend:**
-	```sh
-	streamlit run app_streamlit.py
-	```
-
-
-## License
-
-MIT License. See LICENSE file for details.
-
-
-[def]: my_graph.png
+Do not commit `.env`; it is ignored by Git. Keep API keys in Render's environment settings. For traffic from friends, monitor provider quotas and Render logs; the Google free tier may rate limit repeated tool-driven requests.

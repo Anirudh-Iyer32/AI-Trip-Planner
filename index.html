@@ -6,16 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>VOYAGE — Your world, planned by AI</title>
   <meta name="description"
-    content="Voyage builds your bespoke travel itinerary in seconds. Handcrafted, editorial itineraries powered by real-time intelligence.">
-
-  <!-- Google Analytics 4 -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-SLTC2QK775"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-    gtag('config', 'G-SLTC2QK775');
-  </script>
+    content="Build a practical travel itinerary with day-by-day ideas and estimated costs.">
 
   <!-- Google Fonts: Playfair Display & Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -617,6 +608,8 @@
     .bot-response strong { font-weight: 600; color: var(--text-dark); }
     .bot-response em { font-style: italic; color: var(--text-muted); }
     .bot-response hr { border: none; border-top: 1px solid var(--border-cream); margin: 1.25rem 0; }
+    .bot-response table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.82rem; }
+    .bot-response th, .bot-response td { border: 1px solid var(--border-cream); padding: 0.45rem; text-align: left; vertical-align: top; }
     .bot-response .cost-block {
       background-color: var(--bg-dark);
       color: var(--text-light);
@@ -1289,6 +1282,20 @@
       }
     }
 
+    .trip-brief { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; margin: 0 0 1.4rem; align-items: end; }
+    .trip-brief label { display: block; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); }
+    .trip-brief input, .trip-brief select { display: block; width: 100%; margin-top: 0.45rem; min-height: 43px; padding: 0.6rem; border: 1px solid var(--border-cream); background: var(--bg-white); color: var(--text-dark); font: inherit; }
+    .trip-brief button { min-height: 43px; border: 0; cursor: pointer; }
+    .result-actions { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .result-actions button { border: 1px solid var(--border-cream); background: var(--bg-cream); color: var(--text-dark); padding: 0.5rem 0.8rem; cursor: pointer; font: inherit; font-size: 0.8rem; }
+    .result-actions button:disabled { opacity: 0.55; cursor: default; }
+    .analytics-consent { position: fixed; z-index: 1000; left: 1rem; right: 1rem; bottom: 1rem; max-width: 600px; margin: auto; padding: 1rem 1.2rem; background: var(--bg-dark); color: white; box-shadow: 0 8px 30px #0003; display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; font-size: 0.85rem; }
+    .analytics-consent[hidden] { display: none; }
+    .analytics-consent p { flex: 1 1 280px; }
+    .analytics-consent button { padding: 0.45rem 0.7rem; cursor: pointer; border: 1px solid white; background: white; color: var(--bg-dark); }
+    .analytics-consent button:last-child { color: white; background: transparent; }
+    @media (max-width: 740px) { .trip-brief { grid-template-columns: repeat(2, 1fr); } }
+
     /* Print Styles */
     @media print {
       .navbar,
@@ -1319,6 +1326,12 @@
 
 <body>
 
+  <div class="analytics-consent" id="analyticsConsent" hidden>
+    <p>Help us study how people use Voyage. We only track actions such as planning and downloading, never your trip text.</p>
+    <button type="button" onclick="setAnalyticsConsent('yes')">Allow analytics</button>
+    <button type="button" onclick="setAnalyticsConsent('no')">No thanks</button>
+  </div>
+
   <!-- 1. NAVBAR -->
   <header class="navbar" id="navbar">
     <a href="#" class="nav-logo">VOYAGE</a>
@@ -1341,7 +1354,7 @@
         <span>starts with one question.</span>
       </h1>
       <p class="hero-subheading">
-        Voyage builds your perfect itinerary in seconds — flights, stays, food, culture, all of it.
+        Turn a destination and a few preferences into an itinerary with activities, food, transport, and estimated costs.
       </p>
       <a href="#planner" class="btn-terracotta hero-cta">Start Planning</a>
     </div>
@@ -1421,6 +1434,13 @@
         <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0.75rem; font-weight: 300;">Type naturally — destination, duration, budget, preferences. The AI handles the rest.</p>
       </div>
 
+      <form class="trip-brief" id="tripBrief" onsubmit="submitTripBrief(event)">
+        <label>Destination<input id="briefDestination" name="destination" required maxlength="80" placeholder="e.g. Coorg"></label>
+        <label>Days<input id="briefDays" name="days" type="number" min="1" max="14" value="4" required></label>
+        <label>Budget<select id="briefBudget" name="budget"><option value="budget">Budget</option><option value="mid-range" selected>Mid-range</option><option value="luxury">Luxury</option></select></label>
+        <button class="btn-terracotta" type="submit">Build my trip</button>
+      </form>
+
       <!-- Chat Window -->
       <div class="chat-window" id="chatWindow">
         <div class="chat-messages" id="chatMessages">
@@ -1428,7 +1448,7 @@
           <div class="chat-msg bot" id="welcomeMsg">
             <div class="chat-avatar bot-av">V</div>
             <div class="chat-bubble bot-response">
-              <p>Welcome to <strong>Voyage</strong>. I can plan your complete travel itinerary — flights, stays, dining, culture, and a day-by-day schedule.</p>
+              <p>Welcome to <strong>Voyage</strong>. I can suggest stays, dining, culture, and a day-by-day schedule. Check live prices and availability before booking.</p>
               <p>Just tell me where you want to go. For example:</p>
               <ul>
                 <li><em>Plan a 5-day trip to Jaisalmer for two, mid-range budget in INR</em></li>
@@ -1482,14 +1502,14 @@
         <div class="step-item">
           <div class="step-number">02</div>
           <h3 class="step-title">AI builds your plan</h3>
-          <p class="step-desc">Agents search flights, stays, restaurants, and experiences in real time.</p>
+          <p class="step-desc">The planner combines AI with place search, weather, currency, and cost tools.</p>
         </div>
 
         <!-- Step 3 -->
         <div class="step-item">
           <div class="step-number">03</div>
           <h3 class="step-title">Explore and adapt</h3>
-          <p class="step-desc">Refine any part of the plan with a single message or tailored request.</p>
+          <p class="step-desc">Copy or download your plan, then try another request to explore an alternative.</p>
         </div>
       </div>
     </div>
@@ -1507,25 +1527,25 @@
         <!-- Feature 1 -->
         <div class="feature-item">
           <h3 class="feature-title">Real-time search</h3>
-          <p class="feature-desc">Live flight and hotel data, not cached suggestions.</p>
+          <p class="feature-desc">Place search and weather help inform your itinerary.</p>
         </div>
 
         <!-- Feature 2 -->
         <div class="feature-item">
           <h3 class="feature-title">Budget-aware</h3>
-          <p class="feature-desc">Every recommendation fits your actual budget.</p>
+          <p class="feature-desc">Choose a budget tier and review estimated costs.</p>
         </div>
 
         <!-- Feature 3 -->
         <div class="feature-item">
-          <h3 class="feature-title">Locally curated</h3>
-          <p class="feature-desc">Restaurants and spots locals actually go to.</p>
+          <h3 class="feature-title">Food and places</h3>
+          <p class="feature-desc">Get suggestions for activities and local dining.</p>
         </div>
 
         <!-- Feature 4 -->
         <div class="feature-item">
-          <h3 class="feature-title">Fully adaptable</h3>
-          <p class="feature-desc">Change any part of your plan mid-conversation.</p>
+          <h3 class="feature-title">Easy to explore</h3>
+          <p class="feature-desc">Try different destinations and preferences in a few clicks.</p>
         </div>
       </div>
     </div>
@@ -1540,17 +1560,18 @@
           <div class="footer-tagline">Your world, planned by AI</div>
         </div>
         <div class="footer-meta-right">
-          Built with Claude AI
+          Powered by AI and travel tools
         </div>
       </div>
       <div class="footer-rule"></div>
       <div class="footer-bottom">
-        <div>&copy; 2025 Voyage. All rights reserved.</div>
-        <div>Editorial Travel Intelligence</div>
+        <div>&copy; 2026 Voyage. All rights reserved.</div>
+        <div><button type="button" onclick="openAnalyticsSettings()" style="background:none;border:0;color:inherit;cursor:pointer;text-decoration:underline">Analytics settings</button></div>
       </div>
     </div>
   </footer>
 
+  <script src="/analytics.js"></script>
   <!-- VANILLA JAVASCRIPT -->
   <script>
     // -----------------------------------------------
@@ -1601,6 +1622,7 @@
     // DESTINATION CARD CLICK — pre-fills chat input
     // -----------------------------------------------
     function selectDestination(destinationName) {
+      trackEvent('destination_selected', { destination: destinationName.split(',')[0].toLowerCase() });
       const input = document.getElementById('chatInput');
       input.value = `Plan a trip to ${destinationName}`;
       document.getElementById('planner').scrollIntoView({ behavior: 'smooth' });
@@ -1611,7 +1633,7 @@
     // CHAT SUGGESTION CHIPS
     // -----------------------------------------------
     function useChip(btn) {
-      trackEvent('example_prompt_clicked');
+      trackEvent('example_prompt_clicked', { prompt_position: Array.from(btn.parentElement.children).indexOf(btn) + 1 });
       const input = document.getElementById('chatInput');
       input.value = btn.textContent;
       input.focus();
@@ -1622,35 +1644,52 @@
     // -----------------------------------------------
     function renderMarkdown(md) {
       if (!md || !md.trim()) return '<p>No content returned.</p>';
-
-      let html = md
-        // Horizontal rules
-        .replace(/^---+$/gm, '<hr>')
-        // H1
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        // H2
-        .replace(/^## (.+)$/gm, '<h2>$2</h2>'.replace('$2', '$1'))
-        // H3
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        // H4
-        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-        // Bold
+      const inline = text => escapeHtml(text)
+        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        // Italic
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        // Unordered list items
-        .replace(/^[ \t]*[\*\-] (.+)$/gm, '<li>$1</li>')
-        // Ordered list items
-        .replace(/^[ \t]*\d+\. (.+)$/gm, '<li>$1</li>')
-        // Wrap consecutive <li> in <ul>
-        .replace(/(<li>[\s\S]*?<\/li>)(\s*(?=<li>|$))/g, '$1')
-        .replace(/((?:<li>[\s\S]*?<\/li>\s*)+)/gm, '<ul>$1</ul>')
-        // Paragraphs: double newlines
-        .replace(/\n\n+/g, '</p><p>')
-        // Single newlines to <br> within paragraphs
-        .replace(/([^>])\n([^<])/g, '$1<br>$2');
-
-      return `<p>${html}</p>`;
+        .replace(/`(.+?)`/g, '<code>$1</code>');
+      const lines = md.split(/\r?\n/);
+      const result = [];
+      let paragraph = [];
+      let list = [];
+      let listType = 'ul';
+      const flushParagraph = () => { if (paragraph.length) result.push(`<p>${paragraph.map(inline).join('<br>')}</p>`); paragraph = []; };
+      const flushList = () => { if (list.length) result.push(`<${listType}>${list.map(item => `<li>${inline(item)}</li>`).join('')}</${listType}>`); list = []; };
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) { flushParagraph(); flushList(); continue; }
+        if (/^\|.*\|$/.test(line) && /^\|[\s:|-]+\|$/.test((lines[i + 1] || '').trim())) {
+          flushParagraph(); flushList();
+          const cells = row => row.slice(1, -1).split('|').map(cell => cell.trim());
+          const header = cells(line).map(cell => `<th>${inline(cell)}</th>`).join('');
+          const rows = [];
+          i++;
+          while (i + 1 < lines.length && /^\|.*\|$/.test(lines[i + 1].trim())) {
+            i++;
+            rows.push(`<tr>${cells(lines[i].trim()).map(cell => `<td>${inline(cell)}</td>`).join('')}</tr>`);
+          }
+          result.push(`<table><thead><tr>${header}</tr></thead><tbody>${rows.join('')}</tbody></table>`);
+          continue;
+        }
+        const heading = line.match(/^(#{1,4})\s+(.+)$/);
+        if (heading) { flushParagraph(); flushList(); result.push(`<h${heading[1].length}>${inline(heading[2])}</h${heading[1].length}>`); continue; }
+        if (/^[-*_]{3,}$/.test(line)) { flushParagraph(); flushList(); result.push('<hr>'); continue; }
+        const bullet = line.match(/^[-*]\s+(.+)$/);
+        const numbered = line.match(/^\d+\.\s+(.+)$/);
+        if (bullet || numbered) {
+          flushParagraph();
+          const type = numbered ? 'ol' : 'ul';
+          if (list.length && listType !== type) flushList();
+          listType = type;
+          list.push((bullet || numbered)[1]);
+          continue;
+        }
+        flushList();
+        paragraph.push(line.replace(/^>\s*/, ''));
+      }
+      flushParagraph(); flushList();
+      return result.join('');
     }
 
     // -----------------------------------------------
@@ -1660,9 +1699,21 @@
     let lastRawText = '';
 
     function trackEvent(name, params = {}) {
-      if (typeof window.gtag === 'function') {
-        window.gtag('event', name, params);
-      }
+      if (typeof window.analyticsTrack === 'function') window.analyticsTrack(name, params);
+    }
+
+    function escapeHtml(text) {
+      return String(text).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
+    }
+
+    function submitTripBrief(event) {
+      event.preventDefault();
+      const destination = document.getElementById('briefDestination').value.trim();
+      const days = Number(document.getElementById('briefDays').value);
+      const budget = document.getElementById('briefBudget').value;
+      if (!destination || !Number.isInteger(days) || days < 1 || days > 14) return;
+      document.getElementById('chatInput').value = `Plan a ${days}-day ${budget} trip to ${destination}. Include a day-by-day itinerary, places to visit, food, transport, and estimated costs.`;
+      sendChatMessage('brief', { duration_days: days, budget_tier: budget });
     }
 
     // -----------------------------------------------
@@ -1737,7 +1788,7 @@
     // -----------------------------------------------
     // SEND MESSAGE & CALL BACKEND
     // -----------------------------------------------
-    async function sendChatMessage() {
+    async function sendChatMessage(source = 'chat', extraProperties = {}) {
       if (isBotThinking) return;
 
       const input = document.getElementById('chatInput');
@@ -1746,7 +1797,7 @@
       if (!userText) return;
 
       // Show user message
-      appendMessage('user', `<em>${userText}</em>`);
+      appendMessage('user', `<em>${escapeHtml(userText)}</em>`);
       input.value = '';
       input.style.height = 'auto';
 
@@ -1757,6 +1808,8 @@
 
       // Show typing animation
       showTyping();
+      const startedAt = performance.now();
+      trackEvent('plan_started', { source, ...extraProperties });
 
       // Scroll planner into view
       document.getElementById('planner').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1782,36 +1835,38 @@
 
           if (!rawAnswer.trim() || rawAnswer.trim() === 'Itinerary generated successfully.') {
             appendMessage('bot', `<p>The agent returned no itinerary. This may be a rate-limit issue with the Gemini API. Please wait a moment and try again.</p>`);
+            trackEvent('plan_failed', { source, reason: 'empty_response' });
           } else {
             let botHtml = renderMarkdown(rawAnswer);
             if (pdfUrl) {
               botHtml += `
                 <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px dashed var(--border-cream); display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
                   <span style="font-size: 0.82rem; color: var(--text-muted); font-weight: 500;">📄 Complete PDF Itinerary Ready</span>
-                  <a href="${pdfUrl}" target="_blank" download class="btn-terracotta" onclick="trackEvent('pdf_downloaded', { download_type: 'pdf' })" style="padding: 10px 22px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+                  <a href="${pdfUrl}" target="_blank" download class="btn-terracotta" onclick="trackEvent('plan_downloaded', { format: 'pdf' })" style="padding: 10px 22px; font-size: 0.78rem; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Download PDF Itinerary
                   </a>
                 </div>
               `;
             }
+            botHtml += `<div class="result-actions"><button type="button" onclick="copyItinerary()">Copy plan</button><button type="button" onclick="ratePlan(this, 'helpful')">Helpful</button><button type="button" onclick="ratePlan(this, 'not_helpful')">Needs work</button></div>`;
             appendMessage('bot', botHtml);
-            trackEvent('trip_generated');
+            trackEvent('plan_generated', { source, duration_seconds: Math.round((performance.now() - startedAt) / 1000), pdf_available: Boolean(pdfUrl), ...extraProperties });
           }
         } else {
           const errData = await response.json().catch(() => ({}));
-          const errMsg = errData.error || response.statusText || 'Unknown error';
+          const errMsg = escapeHtml(errData.detail || response.statusText || 'Unknown error');
           appendMessage('bot', `
             <p><strong>Agent Notice:</strong> ${errMsg}</p>
-            ${errMsg.includes('429') || errMsg.includes('quota') ? `<p>You have hit the Gemini free-tier daily quota (20 requests/day). Please wait until tomorrow or upgrade your plan at <a href="https://aistudio.google.com" target="_blank" style="color: var(--accent-terracotta);">aistudio.google.com</a>.</p>` : ''}
           `);
+          trackEvent('plan_failed', { source, reason: `http_${response.status}` });
         }
       } catch (err) {
         removeTyping();
         appendMessage('bot', `
-          <p><strong>Connection Error.</strong> Could not reach the backend at <code>http://localhost:8000/query</code>.</p>
-          <p>Make sure the backend is running: <code>uv run uvicorn main:app --reload --port 8000</code></p>
+          <p><strong>Connection Error.</strong> The planner is unavailable right now. Please try again.</p>
         `);
+        trackEvent('plan_failed', { source, reason: 'network' });
       } finally {
         isBotThinking = false;
         sendBtn.disabled = false;
@@ -1829,10 +1884,26 @@
     function copyItinerary() {
       if (lastRawText) {
         navigator.clipboard.writeText(lastRawText)
-          .then(() => alert('Itinerary copied to clipboard.'))
+          .then(() => { trackEvent('plan_copied'); alert('Itinerary copied to clipboard.'); })
           .catch(() => alert('Could not copy. Please select and copy manually.'));
       }
     }
+
+    function ratePlan(button, rating) {
+      button.parentElement.querySelectorAll('button').forEach(item => {
+        if (item.textContent === 'Helpful' || item.textContent === 'Needs work') item.disabled = true;
+      });
+      trackEvent('plan_feedback_submitted', { rating });
+      button.textContent = 'Thanks for your feedback';
+    }
+
+    const plannerObserver = new IntersectionObserver(entries => {
+      if (entries.some(entry => entry.isIntersecting)) {
+        trackEvent('planner_opened');
+        plannerObserver.disconnect();
+      }
+    }, { threshold: 0.25 });
+    plannerObserver.observe(document.getElementById('planner'));
   </script>
 </body>
 

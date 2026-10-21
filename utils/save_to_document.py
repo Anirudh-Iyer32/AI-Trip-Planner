@@ -1,6 +1,7 @@
 import os
 import datetime
 import re
+from uuid import uuid4
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -46,8 +47,7 @@ def save_to_pdf(response_text: str, directory: str = "./output") -> str | None:
     """Export travel plan to a styled PDF file using reportlab."""
     os.makedirs(directory, exist_ok=True)
 
-    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    pdf_filename = f"AI_Trip_Planner_{timestamp}.pdf"
+    pdf_filename = f"AI_Trip_Planner_{uuid4().hex}.pdf"
     pdf_path = os.path.join(directory, pdf_filename)
 
     try:
@@ -141,13 +141,8 @@ def save_to_pdf(response_text: str, directory: str = "./output") -> str | None:
             )
 
         def inline_md(txt: str) -> str:
-            txt = esc(txt)
-            txt = re.sub(r"\*\*\*(.+?)\*\*\*", r"<b><i>\1</i></b>", txt)
-            txt = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", txt)
-            txt = re.sub(r"\*(.+?)\*", r"<i>\1</i>", txt)
-            txt = re.sub(r"_(.+?)_", r"<i>\1</i>", txt)
-            txt = re.sub(r"`(.+?)`", r"<font name='Courier'>\1</font>", txt)
-            return txt
+            # Avoid malformed nested ReportLab tags from arbitrary AI Markdown.
+            return esc(txt.replace("*", "").replace("`", ""))
 
         def line_to_flowable(line: str):
             stripped = line.strip()

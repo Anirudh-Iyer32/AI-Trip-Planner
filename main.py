@@ -1,76 +1,82 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from starlette.responses import JSONResponse, FileResponse
-from agent.agentic_workflow import GraphBuilder
-from utils.save_to_document import save_document, save_to_pdf
+"""FastAPI entry point for the trip planner and public analytics configuration."""
+
+import logging
 import os
-import datetime
+from pathlib import Path
+
 from dotenv import load_dotenv
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException
+from fastapi.concurrency import run_in_threadpool
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+from starlette.responses import FileResponse
 
-load_dotenv()
+from agent.agentic_workflow import GraphBuilder
+from utils.save_to_document import save_to_pdf
 
-app = FastAPI()
+ROOT = Path(__file__).resolve().parent
+load_dotenv(ROOT / ".env")
+OUTPUT = ROOT / "output"
+OUTPUT.mkdir(exist_ok=True)
+logger = logging.getLogger(__name__)
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # set specific origins in prod
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Ensure output directory exists and mount static files for PDF downloads
-os.makedirs("output", exist_ok=True)
-app.mount("/output", StaticFiles(directory="output"), name="output")
+app = FastAPI(title="Voyage Trip Planner")
+app.mount("/output", StaticFiles(directory=OUTPUT), name="output")
 
 
 @app.get("/")
-async def get_index():
-    if os.path.exists("index.html"):
-        return FileResponse("index.html")
-    return {"message": "AI Trip Planner API is running"}
+def get_index():
+    return FileResponse(ROOT / "index.html")
+
+
+@app.get("/analytics.js")
+def get_analytics_script():
+    return FileResponse(ROOT / "analytics.js", media_type="text/javascript")
+
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+
+@app.get("/analytics-config")
+def analytics_config():
+    """Only publish browser-side project IDs. Never expose LLM or service keys."""
+    return {
+        "ga_measurement_id": os.getenv("GA_MEASUREMENT_ID", ""),
+        "mixpanel_token": os.getenv("MIXPANEL_TOKEN", ""),
+        "amplitude_api_key": os.getenv("AMPLITUDE_API_KEY", ""),
+        "posthog_project_token": os.getenv("POSTHOG_PROJECT_TOKEN", ""),
+        "posthog_host": os.getenv("POSTHOG_HOST", "https://us.i.posthog.com"),
+    }
 
 
 class QueryRequest(BaseModel):
-    question: str
+    question: str = Field(min_length=3, max_length=1000)
+
+
+def generate_plan(question: str) -> str:
+    graph = GraphBuilder(model_provider=os.getenv("MODEL_PROVIDER", "google"))()
+    output = graph.invoke({"messages": [("user", question)]}, config={"recursion_limit": 8})
+    if not isinstance(output, dict) or not output.get("messages"):
+        raise RuntimeError("The planner returned no messages")
+    for message in reversed(output["messages"]):
+        content = getattr(message, "content", "")
+        if isinstance(content, str) and content.strip():
+            return content.strip()
+    raise RuntimeError("The planner returned no itinerary")
 
 
 @app.post("/query")
 async def query_travel_agent(query: QueryRequest):
+    provider = os.getenv("MODEL_PROVIDER", "google")
+    if not os.getenv("GROQ_API_KEY" if provider == "groq" else "GOOGLE_API_KEY"):
+        raise HTTPException(status_code=503, detail="Planner is not configured yet")
     try:
-        print(query)
-        graph = GraphBuilder(model_provider="google")
-        react_app = graph()
+        answer = await run_in_threadpool(generate_plan, query.question.strip())
+    except Exception:
+        logger.exception("Trip generation failed")
+        raise HTTPException(status_code=502, detail="The planner could not generate this trip. Please try again.")
 
-        png_graph = react_app.get_graph().draw_mermaid_png()
-        with open("my_graph.png", "wb") as f:
-            f.write(png_graph)
-
-        print(f"Graph saved as 'my_graph.png' in {os.getcwd()}")
-        messages = {"messages": [query.question]}
-        output = react_app.invoke(messages)
-        print("invoking success")
-
-        if isinstance(output, dict) and "messages" in output:
-            for m in reversed(output["messages"]):
-                content = getattr(m, "content", "")
-                if content and isinstance(content, str) and content.strip():
-                    final_output = content
-                    break
-            else:
-                last_m = output["messages"][-1]
-                final_output = getattr(last_m, "content", str(last_m))
-        else:
-            final_output = str(output)
-
-        # Save markdown and PDF outputs
-        save_document(response_text=final_output)
-        pdf_filename = save_to_pdf(response_text=final_output)
-
-        pdf_url = f"/output/{pdf_filename}" if pdf_filename else None
-
-        return {"answer": final_output, "pdf_url": pdf_url}
-    except Exception as e:
-        return JSONResponse(status_code=500, content={"error": str(e)})
+    pdf_filename = await run_in_threadpool(save_to_pdf, answer, str(OUTPUT))
+    return {"answer": answer, "pdf_url": f"/output/{pdf_filename}" if pdf_filename else None}
