@@ -34,6 +34,8 @@ The existing GA4 measurement ID from the project is already set in `render.yaml`
 
 All four receive the same explicit events from `analytics.js`. Automatic click, form, and session recording are disabled to avoid collecting trip text. Analytics project IDs are public browser credentials by design; LLM keys remain server-side.
 
+LangSmith tracing is off in `.env_example` because traces can contain trip requests. Enable it separately only if your study needs debugging traces and you have told participants.
+
 | Event | Trigger | Useful question |
 | --- | --- | --- |
 | `page_view` | Consent granted on the planner page | How many opted-in visitors arrived? |
