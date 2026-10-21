@@ -29,6 +29,7 @@ The existing GA4 measurement ID from the project is already set in `render.yaml`
 | --- | --- | --- |
 | Google Analytics 4 | `GA_MEASUREMENT_ID` | Web data stream measurement ID (`G-...`) |
 | Mixpanel | `MIXPANEL_TOKEN` | Project token |
+| Mixpanel region (optional) | `MIXPANEL_API_HOST` | Leave unset for a US project; EU: `https://api-eu.mixpanel.com`; India: `https://api-in.mixpanel.com` |
 | Amplitude | `AMPLITUDE_API_KEY` | Project API key |
 | PostHog | `POSTHOG_PROJECT_TOKEN`, `POSTHOG_HOST` | Project token and ingestion host (US or EU) |
 

@@ -39,11 +39,22 @@
       loadScript(`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(config.ga_measurement_id)}`).catch(console.warn);
     }
     if (config.mixpanel_token) {
-      loadScript('https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js').then(() => {
-        window.mixpanel.init(config.mixpanel_token, { autocapture: false, track_pageview: false });
-        providers.push((name, data) => window.mixpanel.track(name, data));
-        window.mixpanel.track('page_view', { page_name: 'planner', app: 'voyage', schema_version: 1 });
-      }).catch(console.warn);
+      // The CDN bundle expects Mixpanel's queue/bootstrap object to exist first.
+      const mixpanel = window.mixpanel = window.mixpanel || [];
+      mixpanel._i = [];
+      mixpanel.__SV = 1.2;
+      mixpanel.init = (token, options) => {
+        mixpanel.track = (...args) => mixpanel.push(['track', ...args]);
+        mixpanel._i.push([token, options, 'mixpanel']);
+      };
+      const mixpanelOptions = {
+        autocapture: false,
+        track_pageview: false,
+      };
+      if (config.mixpanel_api_host) mixpanelOptions.api_host = config.mixpanel_api_host;
+      mixpanel.init(config.mixpanel_token, mixpanelOptions);
+      providers.push((name, data) => window.mixpanel.track(name, data));
+      loadScript('https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js').catch(console.warn);
     }
     if (config.amplitude_api_key) {
       loadScript('https://cdn.amplitude.com/libs/analytics-browser-2.48.1-min.js.gz').then(() => {

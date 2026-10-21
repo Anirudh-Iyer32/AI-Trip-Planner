@@ -45,6 +45,7 @@ def analytics_config():
     return {
         "ga_measurement_id": os.getenv("GA_MEASUREMENT_ID", ""),
         "mixpanel_token": os.getenv("MIXPANEL_TOKEN", ""),
+        "mixpanel_api_host": os.getenv("MIXPANEL_API_HOST", ""),
         "amplitude_api_key": os.getenv("AMPLITUDE_API_KEY", ""),
         "posthog_project_token": os.getenv("POSTHOG_PROJECT_TOKEN", ""),
         "posthog_host": os.getenv("POSTHOG_HOST", "https://us.i.posthog.com"),
