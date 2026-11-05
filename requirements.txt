@@ -13,3 +13,5 @@ langgraph==0.6.6
 duckduckgo-search==8.1.1
 ddgs==9.16.0
 reportlab==5.0.1
+pillow>=11.0.0
+pypdf>=5.0.0
