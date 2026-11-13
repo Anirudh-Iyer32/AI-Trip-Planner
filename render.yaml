@@ -28,6 +28,10 @@ services:
         sync: false
       - key: SUPABASE_ANON_KEY
         sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
       - key: GA_MEASUREMENT_ID
         value: G-SLTC2QK775
       - key: MIXPANEL_TOKEN

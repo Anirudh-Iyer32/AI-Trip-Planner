@@ -3,11 +3,16 @@
 import logging
 import os
 import secrets
+import hashlib
+import hmac
+import json
+import re
+import tempfile
 from pathlib import Path
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 import httpx
 from fastapi.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
@@ -53,8 +58,10 @@ async def require_account(request: Request, call_next):
                     f"{url}/auth/v1/user",
                     headers={"apikey": key, "Authorization": token},
                 )
-            if response.status_code != 200 or not response.json().get("id"):
+            user_id = response.json().get("id") if response.status_code == 200 else None
+            if not user_id:
                 return JSONResponse({"detail": "Your session expired. Sign in again."}, status_code=401)
+            request.state.user_id = user_id
         except (httpx.HTTPError, ValueError):
             return JSONResponse({"detail": "Could not verify your session. Try again."}, status_code=503)
     return await call_next(request)
@@ -217,6 +224,56 @@ class PdfRequest(BaseModel):
     plan: TripPlan
 
 
+class PaidPdfRequest(PdfRequest):
+    razorpay_order_id: str = Field(pattern=r"^order_[A-Za-z0-9]+$")
+    razorpay_payment_id: str = Field(pattern=r"^pay_[A-Za-z0-9]+$")
+    razorpay_signature: str = Field(pattern=r"^[a-fA-F0-9]{64}$")
+
+
+PDF_PRICE_PAISE = 4900
+
+
+def _payment_keys():
+    key_id = os.getenv("RAZORPAY_KEY_ID", "").strip()
+    key_secret = os.getenv("RAZORPAY_KEY_SECRET", "").strip()
+    if not key_id.startswith("rzp_test_") or not key_secret:
+        raise HTTPException(status_code=503, detail="Test checkout is not configured yet.")
+    return key_id, key_secret
+
+
+def _plan_digest(destination: str, plan: TripPlan) -> str:
+    body = {"destination": destination, "plan": plan.model_dump(mode="json")}
+    return hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+
+
+async def _razorpay(method: str, path: str, **kwargs):
+    key_id, key_secret = _payment_keys()
+    try:
+        async with httpx.AsyncClient(timeout=12, auth=(key_id, key_secret)) as client:
+            response = await client.request(method, f"https://api.razorpay.com/v1/{path}", **kwargs)
+        response.raise_for_status()
+        return response.json()
+    except (httpx.HTTPError, ValueError) as exc:
+        logger.warning("Razorpay request failed: %s", type(exc).__name__)
+        raise HTTPException(status_code=502, detail="Could not verify payment. Please try again.") from exc
+
+
+@app.post("/api/v2/pdf/order")
+async def v2_pdf_order(payload: PdfRequest, request: Request):
+    key_id, _ = _payment_keys()
+    order = await _razorpay("POST", "orders", json={
+        "amount": PDF_PRICE_PAISE, "currency": "INR",
+        "receipt": f"voyage_pdf_{secrets.token_hex(10)}",
+        "notes": {"user_id": request.state.user_id,
+                  "plan_digest": _plan_digest(payload.destination, payload.plan),
+                  "purpose": "voyage_pdf_test"},
+    })
+    if not order.get("id") or order.get("amount") != PDF_PRICE_PAISE:
+        raise HTTPException(status_code=502, detail="Could not start checkout. Please try again.")
+    return {"key_id": key_id, "order_id": order["id"], "amount": PDF_PRICE_PAISE,
+            "currency": "INR", "test_mode": True}
+
+
 class EnrichRequest(BaseModel):
     plan: TripPlan
 
@@ -227,11 +284,41 @@ async def v2_enrich(request: EnrichRequest):
 
 
 @app.post("/api/v2/pdf")
-async def v2_pdf(request: PdfRequest):
-    filename = await run_in_threadpool(save_v2_pdf, request.destination, request.plan, str(OUTPUT))
-    if not filename:
-        raise HTTPException(status_code=502, detail="Could not create the PDF")
-    return {"pdf_url": f"/output/{filename}"}
+async def v2_pdf(payload: PaidPdfRequest, request: Request):
+    _, key_secret = _payment_keys()
+    signed = f"{payload.razorpay_order_id}|{payload.razorpay_payment_id}".encode()
+    expected = hmac.new(key_secret.encode(), signed, hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(expected, payload.razorpay_signature.lower()):
+        raise HTTPException(status_code=403, detail="Payment verification failed.")
+    order = await _razorpay("GET", f"orders/{payload.razorpay_order_id}")
+    payment = await _razorpay("GET", f"payments/{payload.razorpay_payment_id}")
+    expected_digest = _plan_digest(payload.destination, payload.plan)
+    if (order.get("id") != payload.razorpay_order_id or
+        order.get("status") != "paid" or
+        order.get("amount") != PDF_PRICE_PAISE or
+        order.get("currency") != "INR" or
+        (order.get("notes") or {}).get("user_id") != request.state.user_id or
+        (order.get("notes") or {}).get("plan_digest") != expected_digest or
+        payment.get("id") != payload.razorpay_payment_id or
+        payment.get("order_id") != payload.razorpay_order_id or
+        payment.get("status") != "captured" or
+        payment.get("amount") != PDF_PRICE_PAISE or
+        payment.get("currency") != "INR"):
+        raise HTTPException(status_code=403, detail="This payment does not unlock this itinerary.")
+    with tempfile.TemporaryDirectory(prefix="voyage-paid-pdf-") as directory:
+        try:
+            filename = await run_in_threadpool(save_v2_pdf, payload.destination, payload.plan, directory)
+            if not filename:
+                raise ValueError("PDF generator returned no file")
+            document = (Path(directory) / filename).read_bytes()
+        except Exception as exc:
+            logger.warning("Paid PDF generation failed: %s", type(exc).__name__)
+            raise HTTPException(status_code=502, detail="Could not create the PDF. Please retry your download.") from exc
+    safe_destination = re.sub(r"[^A-Za-z0-9-]+", "-", payload.destination).strip("-") or "trip"
+    return Response(content=document, media_type="application/pdf", headers={
+        "Content-Disposition": f'attachment; filename="Voyage-{safe_destination}.pdf"',
+        "Cache-Control": "no-store",
+    })
 
 
 @app.post("/api/v2/bookings/extract")

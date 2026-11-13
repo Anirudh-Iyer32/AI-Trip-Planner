@@ -43,6 +43,7 @@
   function commitPlan(plan, brief, isNew = false) {
     if (isNew) trip = {...brief, id:Date.now(), createdAt:new Date().toISOString(), reviewed:false, saved:false, shared:false};
     trip.plan = plan;
+    delete trip.pdfPayment;
     if (isNew) trip.budgetScenario = null;
     trip.activities = plan.days.map(day => day.activities.map(a => ({...a})));
     selectedDay = Math.min(selectedDay, plan.days.length - 1);
@@ -60,6 +61,7 @@
       try {baseRenderTrip();} finally {trip.activities = originalActivities; trip.destination = originalDestination;}
     } else baseRenderTrip();
     if (!trip?.plan) return;
+    document.querySelector('#download-trip').textContent = trip.pdfPayment ? 'Download unlocked PDF' : 'Get PDF · ₹49 test';
     const day = trip.plan.days[selectedDay];
     const content = document.querySelector('#day-content');
     content.querySelector('.day-title').textContent = `Day ${selectedDay + 1}: ${day.title.replace(/^Day\s*\d+\s*[:–—-]\s*/i, '')}`;
@@ -284,11 +286,80 @@
     document.querySelector('#ask-nearby').onclick=ask;
     track('nearby_attractions_viewed',{destination:destination.name.toLowerCase()});
   }
+  let checkoutLoader;
+  function loadCheckout() {
+    if (window.Razorpay) return Promise.resolve();
+    if (!checkoutLoader) checkoutLoader = new Promise((resolve,reject) => {
+      const script=document.createElement('script');
+      script.src='https://checkout.razorpay.com/v1/checkout.js';
+      script.onload=resolve;
+      script.onerror=()=>{checkoutLoader=null;reject(new Error('Payment checkout could not load. Check your connection and try again.'))};
+      document.head.append(script);
+    });
+    return checkoutLoader;
+  }
+  async function deliverPdf(payment) {
+    await enrichmentPromise;
+    const response=await window.voyageFetch('/api/v2/pdf',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({destination:trip.destination,plan:trip.plan,...payment})
+    });
+    if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.detail||'Could not prepare your PDF. Try again.');}
+    const url=URL.createObjectURL(await response.blob());
+    const link=document.createElement('a');
+    link.href=url;link.download=`Voyage-${trip.destination.replace(/[^a-z0-9]/gi,'-')}.pdf`;
+    document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);
+    track('plan_downloaded',{format:'pdf',payment_mode:'razorpay_test'});
+    toast('Your PDF is downloading.');
+  }
   async function download(button) {
     if (!trip?.plan) {toast('Create an itinerary first.');return;}
-    const restore=busy(button,'Preparing PDF…');
-    try {await enrichmentPromise;const result=await api('pdf',{destination:trip.destination,plan:trip.plan});const link=document.createElement('a');link.href=result.pdf_url;link.download=`Voyage-${trip.destination.replace(/[^a-z0-9]/gi,'-')}.pdf`;document.body.append(link);link.click();link.remove();track('plan_downloaded',{format:'pdf'});toast('PDF is ready to download.');}
-    catch(error){toast(error.message)}finally{restore()}
+    if(trip.pdfPayment){
+      const restore=busy(button,'Preparing PDF…');
+      try{await deliverPdf(trip.pdfPayment);return;}
+      catch(error){if(!/unlock|verification/i.test(error.message)){toast(error.message);return;}delete trip.pdfPayment;renderTrip();if(trip.saved)window.persistSavedTrip?.(trip);}
+      finally{restore()}
+    }
+    drawer('Get your itinerary PDF',`<div class="pdf-checkout"><p>Your complete ${escapeHTML(trip.destination)} itinerary, ready to keep offline.</p><div class="pdf-checkout-price"><span>PDF download</span><strong>₹49</strong></div><p class="pdf-test-note">Razorpay test checkout · No real money will be charged.</p><button class="button button-dark" id="pay-for-pdf" type="button">Continue to test payment</button><p class="fine-print">Your plan stays available in My trips. A successful test payment unlocks this PDF for the current plan.</p></div>`);
+    track('pdf_checkout_viewed',{price_inr:49,payment_mode:'razorpay_test'});
+    document.querySelector('#pay-for-pdf').onclick=async()=>{
+      const payButton=document.querySelector('#pay-for-pdf');
+      const restore=busy(payButton,'Opening checkout…');
+      try{
+        await enrichmentPromise;
+        const order=await api('pdf/order',{destination:trip.destination,plan:trip.plan});
+        await loadCheckout();
+        track('pdf_payment_started',{price_inr:49,payment_mode:'razorpay_test'});
+        let paymentCompleted=false;
+        const checkout=new window.Razorpay({
+          key:order.key_id,amount:order.amount,currency:order.currency,order_id:order.order_id,
+          name:'VOYAGE',description:'Itinerary PDF · test payment',
+          theme:{color:'#193c49'},
+          handler:async response=>{
+            paymentCompleted=true;
+            payButton.textContent='Verifying payment…';payButton.disabled=true;
+            try{
+              const payment={razorpay_order_id:response.razorpay_order_id,
+                razorpay_payment_id:response.razorpay_payment_id,
+                razorpay_signature:response.razorpay_signature};
+              trip.pdfPayment=payment;
+              if(trip.saved) window.persistSavedTrip?.(trip);
+              await deliverPdf(payment);
+              renderTrip();
+              track('pdf_payment_verified',{price_inr:49,payment_mode:'razorpay_test'});
+              closeDrawer();
+            }catch(error){
+              showError(`${error.message} Your test payment is saved; retry the PDF without paying again.`,true);
+              payButton.disabled=false;payButton.textContent='Retry PDF download';
+              payButton.onclick=async()=>{const reset=busy(payButton,'Preparing PDF…');try{await deliverPdf(trip.pdfPayment);closeDrawer()}catch(retryError){showError(retryError.message,true)}finally{reset()}};
+            }
+          },
+          modal:{ondismiss:()=>{if(!paymentCompleted)track('pdf_checkout_cancelled');restore()}},
+        });
+        checkout.on('payment.failed',()=>{showError('Test payment failed. Please retry checkout.',true);restore();track('pdf_payment_failed')});
+        checkout.open();
+      }catch(error){showError(error.message,true);restore()}
+    };
   }
   async function share() {
     if(!trip?.plan){toast('Create an itinerary first.');return;}

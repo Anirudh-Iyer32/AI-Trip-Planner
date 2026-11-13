@@ -10,6 +10,20 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const escapeText=value=>String(value??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
 const track=(name,props={})=>window.analyticsTrack?.(name,{...props,experiment_variant:'B',page_name:'version_b'});
 function toast(message){const el=$('#toast');el.textContent=message;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.hidden=true,3600)}
+function drawer(title,body){
+  activeDrawer=document.activeElement;
+  $('#drawer-content').innerHTML=`<h2 id="drawer-title">${escapeText(title)}</h2>${body}`;
+  $('#drawer-backdrop').hidden=false;
+  $('#feature-drawer').hidden=false;
+  $('#drawer-close').focus();
+}
+function closeDrawer(){
+  $('#feature-drawer').hidden=true;
+  $('#drawer-backdrop').hidden=true;
+  $('#drawer-content').innerHTML='';
+  if(activeDrawer?.isConnected)activeDrawer.focus();
+  activeDrawer=null;
+}
 function navigate(view){$$('.view').forEach(x=>x.classList.toggle('active',x.id===`${view}-view`));$$('[data-view]').forEach(x=>x.classList.toggle('nav-active',x.dataset.view===view));window.scrollTo({top:0,behavior:'instant'});track('view_changed',{screen:view});if(view==='trips')renderSaved()}
 function renderDestinations(filter='all'){const list=destinations.filter(d=>filter==='all'||d.type.includes(filter));$('#destination-grid').innerHTML=list.map(d=>`<button class="destination-card" data-destination="${d.name}" aria-label="Explore ${d.name}"><img src="${d.image}" alt="${d.name} destination landscape" loading="lazy"><div class="destination-info"><p class="destination-region">${d.region}</p><h3>${d.name}</h3><p>${d.tag}</p></div></button>`).join('')}
 function openDestination(name){const d=destinations.find(x=>x.name===name);if(!d)return;currentDestination=d;$('#detail-hero').style.backgroundImage=`url('${d.image}')`;$('#detail-region').textContent=d.region;$('#detail-title').textContent=d.name;$('#detail-tagline').textContent=d.tag;$('#detail-description').textContent=d.description;$('#detail-highlights').innerHTML=d.highlights.map(x=>`<span>${x}</span>`).join('');$('#detail-nearby').textContent=d.nearby;$('#detail-days').textContent=d.days;$('#detail-budget').textContent=d.budget;let recent=JSON.parse(localStorage.getItem('voyage_b_recent')||'[]');recent=[name,...recent.filter(x=>x!==name)].slice(0,4);localStorage.setItem('voyage_b_recent',JSON.stringify(recent));renderRecent();navigate('detail');track('destination_viewed',{destination:name.toLowerCase()})}
