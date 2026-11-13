@@ -2,6 +2,7 @@
 
 import logging
 import os
+import secrets
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -12,7 +13,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from pydantic import ValidationError
-from starlette.responses import FileResponse
+from starlette.responses import FileResponse, RedirectResponse
 
 from agent.agentic_workflow import GraphBuilder
 from utils.save_to_document import save_to_pdf
@@ -62,6 +63,20 @@ async def require_account(request: Request, call_next):
 @app.get("/")
 def get_index():
     return FileResponse(ROOT / "index.html")
+
+
+@app.get("/experiment")
+def enter_experiment(request: Request):
+    """Assign a stable variant without altering the two direct page URLs."""
+    variant = request.cookies.get("voyage_ab_v1")
+    if variant not in {"A", "B"}:
+        variant = "B" if secrets.randbelow(2) else "A"
+    destination = "/version-b" if variant == "B" else "/"
+    response = RedirectResponse(f"{destination}?experiment=voyage_ab_v1", status_code=302)
+    response.set_cookie("voyage_ab_v1", variant, max_age=60 * 60 * 24 * 30,
+                        httponly=False, secure=request.url.scheme == "https",
+                        samesite="lax", path="/")
+    return response
 
 
 @app.get("/version-b")

@@ -2,6 +2,11 @@
 (() => {
   const CONSENT_KEY = 'voyage_analytics_consent';
   const isVersionB = window.location.pathname === '/version-b';
+  const variant = isVersionB ? 'B' : 'A';
+  const experimentId = 'voyage_ab_v1';
+  const assignedVariant = document.cookie.split('; ').find(part => part.startsWith('voyage_ab_v1='))?.split('=')[1];
+  const isAssignedVisit = new URLSearchParams(window.location.search).get('experiment') === experimentId
+    && assignedVariant === variant;
   const configPromise = fetch('/analytics-config').then(r => r.ok ? r.json() : {}).catch(() => ({}));
   let enabled = false;
   const providers = [];
@@ -20,7 +25,8 @@
   function track(name, properties = {}) {
     if (!enabled) return;
     // Only callers' predefined fields are sent. Never send prompts or itinerary text.
-    const data = { ...properties, app: 'voyage', schema_version: 1, experiment_variant: isVersionB ? 'B' : 'A' };
+    const data = { ...properties, app: 'voyage', schema_version: 1, experiment_variant: variant,
+      ...(isAssignedVisit ? { experiment_id: experimentId, assignment_type: 'randomized' } : {}) };
     for (const provider of providers) {
       try { provider(name, data); } catch (error) { console.warn('Analytics event failed', error); }
     }
@@ -61,7 +67,11 @@
       loadScript('https://cdn.amplitude.com/libs/analytics-browser-2.48.1-min.js.gz').then(() => {
         window.amplitude.init(config.amplitude_api_key, { autocapture: false });
         providers.push((name, data) => window.amplitude.track(name, data));
-        window.amplitude.track('page_view', { page_name: isVersionB ? 'version_b' : 'planner', app: 'voyage', schema_version: 1, experiment_variant: isVersionB ? 'B' : 'A' });
+        window.amplitude.track('page_view', { page_name: isVersionB ? 'version_b' : 'planner', app: 'voyage', schema_version: 1,
+          experiment_variant: variant, ...(isAssignedVisit ? {experiment_id: experimentId, assignment_type:'randomized'} : {}) });
+        if (isAssignedVisit) window.amplitude.track('experiment_exposure', {
+          app:'voyage', schema_version:1, experiment_variant:variant, experiment_id:experimentId, assignment_type:'randomized'
+        });
       }).catch(console.warn);
     }
     if (config.posthog_project_token) {
@@ -78,6 +88,7 @@
       providers.push((name, data) => window.posthog.capture(name, data));
     }
     track('page_view', { page_name: isVersionB ? 'version_b' : 'planner' });
+    if (isAssignedVisit) track('experiment_exposure');
   }
 
   function choose(value) {

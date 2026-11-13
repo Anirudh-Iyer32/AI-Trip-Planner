@@ -111,3 +111,11 @@ To finish setup:
 6. Deploy the updated app, register a test account, generate a trip, sign out, sign back in, and verify it appears in **My trips**. Repeat with a second account to check isolation.
 
 The public `SUPABASE_ANON_KEY` is designed for browser use. `GROQ_API_KEY`, `TAVILY_API_KEY`, `SERPAPI_API_KEY`, and any Google AI key remain server-only. Do not put service-role keys in the browser or Git.
+
+## Version A/B measurement in GA4
+
+Share `https://ai-trip-planner-3-wpbu.onrender.com/experiment` with testers. The server assigns A or B at random with equal probability, stores the assignment in a 30-day cookie, and redirects to `/` (A) or `/version-b` (B). Existing direct URLs stay available. Only visits through this entry link carry `experiment_id=voyage_ab_v1` in opted-in analytics; direct visits are excluded from the randomized comparison. Each opted-in assigned page load sends `experiment_exposure` and `page_view` with `experiment_variant` (`A` or `B`). Other feature events carry the same fields. Internal Version B navigation sends `view_changed` so it does not inflate page views.
+
+In GA4, create event-scoped custom dimensions for `experiment_variant` and `experiment_id` under Admin → Data display → Custom definitions. In Explore → Free form, filter `Event name = experiment_exposure` and `Experiment ID = voyage_ab_v1`, put Experiment Variant in Rows, and Total users in Values. This is the consented-user split. Compare conversions with a funnel `experiment_exposure → plan_started → plan_generated`, broken down by Experiment Variant. Allow 24–48 hours for custom dimensions to become available in standard reporting. Keep the same date range for both variants. The allocation is random but observed counts need not be exactly 50/50, especially with a small class sample. Version B also requires an account, so interpret conversion differences as the effect of the whole product experience, including sign-in.
+
+Do not mix synthetic test events with this production property. For a presentation mockup, use a separate GA4 test property or clearly label an external illustrative dataset as simulated. Report the real production counts separately.
